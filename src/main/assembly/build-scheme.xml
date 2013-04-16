@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<assembly  xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
+   xmlns='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2'
+   xsi:schemaLocation='http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd'>
+
+     <id>distr</id>
+     <formats>
+          <format>zip</format>
+          <format>tar.gz</format>
+     </formats>
+     <includeBaseDirectory>false</includeBaseDirectory>
+     <fileSets>
+          <fileSet>
+               <directory>${project.build.directory}</directory>
+               <includes>
+                    <include>*.jar</include>
+               </includes>
+               <outputDirectory>svg-embed-and-crop</outputDirectory>
+          </fileSet>
+          <fileSet>
+               <directory>${project.basedir}</directory>
+               <outputDirectory>svg-embed-and-crop</outputDirectory>
+               <includes>
+                    <include>README*</include>
+                    <include>LICENSE*</include>
+                    <include>NOTICE*</include>
+               </includes>
+          </fileSet>
+          <fileSet>
+               <directory>${project.basedir}/src/main/assembly</directory>
+               <outputDirectory>/</outputDirectory>
+               <includes>
+                    <include>*.py</include>
+                    <include>*.inx</include>
+               </includes>
+          </fileSet>
+     </fileSets>
+     <dependencySets>
+          <dependencySet>
+               <outputDirectory>svg-embed-and-crop</outputDirectory>
+               <scope>compile</scope>
+               <useTransitiveDependencies>false</useTransitiveDependencies>
+               <includes>
+                    <include>commons-codec:commons-codec</include>
+                    <include>net.imagej:ij</include>
+               </includes>
+          </dependencySet>
+     </dependencySets>
+
+</assembly>

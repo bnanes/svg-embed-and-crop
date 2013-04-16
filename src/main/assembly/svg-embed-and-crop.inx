@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<inkscape-extension xmlns="http://www.inkscape.org/namespace/inkscape/extension">
+     <_name>Embed and crop images</_name>
+     <id>edu.emory.cellbio.svg.embedandcrop</id>
+     <dependency type="executable" location="extensions">svg-embed-and-crop.py</dependency>
+     <effect>
+          <object-type>all</object-type>
+          <effects-menu>
+               <submenu _name="Images"/>
+          </effects-menu>
+     </effect>
+     <script>
+		<command reldir="extensions" interpreter="python">svg-embed-and-crop.py</command>
+     </script>
+</inkscape-extension>

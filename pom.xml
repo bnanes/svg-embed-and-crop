@@ -1,0 +1,67 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.emory.cellbio</groupId>
+  <artifactId>svg-embed-and-crop</artifactId>
+  <version>1.0-SNAPSHOT</version>
+  <name>Embed and Crop Images Inkscape Plugin</name>
+  <developers>
+     <developer>
+          <name>Benjamin Nanes</name>
+     </developer>
+  </developers>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+     <build>
+          <plugins>
+               <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-assembly-plugin</artifactId>
+                    <version>2.4</version>
+                    <configuration>
+                         <descriptors>
+                              <descriptor>src/main/assembly/build-scheme.xml</descriptor>
+                         </descriptors>
+                    </configuration>
+                    <executions>
+                         <execution>
+                              <id>distributions</id>
+                              <phase>package</phase>
+                              <goals>
+                                   <goal>single</goal>
+                              </goals>
+                         </execution>
+                    </executions>
+               </plugin>
+          </plugins>
+     </build>
+  <dependencies>
+    <dependency>
+      <groupId>commons-codec</groupId>
+      <artifactId>commons-codec</artifactId>
+      <version>1.7</version>
+      <scope>compile</scope>
+    </dependency>
+    <dependency>
+      <groupId>net.imagej</groupId>
+      <artifactId>ij</artifactId>
+      <version>1.47i</version>
+      <type>jar</type>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+  
+  <repositories>
+       <repository>
+         <id>imagej.releases</id>
+         <url>http://maven.imagej.net:8081/content/repositories/releases</url>
+       </repository>
+       <repository>
+         <id>imagej.snapshots</id>
+         <url>http://maven.imagej.net:8081/content/repositories/snapshots</url>
+       </repository>
+  </repositories>
+  
+</project>
