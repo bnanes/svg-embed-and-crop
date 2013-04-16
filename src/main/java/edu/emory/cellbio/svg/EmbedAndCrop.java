@@ -46,6 +46,16 @@ public class EmbedAndCrop
      
      // -- Methods --
      
+     /**
+      * Run the extension
+      * @param args
+      *   <br>- The first argument should be the path of the
+      *   source svg file
+      *   <br>- The second (optional) command should be the image file type
+      *   <br>- The third (optional, but required if a file type is given)
+      *        command should be the compression quality.
+      *   <br><br>Example: "file.svg" "jpeg" "0.95" or "file.svg" "png" "1"
+      */
      public void runInkscapeExtension(String[] args) {
           File input = null;
           if(args == null || args.length<1) {
@@ -53,9 +63,14 @@ public class EmbedAndCrop
                input = openDialog();
           }
           try {
-               getOutputParams();
                if(input == null && args != null)
                     input = new File(args[0]);
+               if(args != null && !(args.length < 3)) {
+                    imgFileType = args[1];
+                    try{ compQual = Float.parseFloat(args[2]); }
+                    catch(NumberFormatException e){ throw new EmbedAndCropException(e.toString()); }
+               }
+               else getOutputParams();
                if(input == null || !input.canRead())
                     throw new EmbedAndCropException("Can't read temporary input file "
                          + input != null ? input.getPath() : "<null>");
