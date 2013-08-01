@@ -1,0 +1,94 @@
+About
+-----
+
+[Inkscape](http://inkscape.org/) is a powerful open-source
+vector graphics editor which supports the inclusion of
+raster images either through file references (links)
+or through direct embedding of the image data in the 
+Inkscape SVG file. Referencing images as links keeps SVG files
+small and ensures that changes to image placement and 
+transformations specified in the SVG file remain separate 
+from the underlying image data. However, embedding images 
+may be required as a final step in some production work-flows. 
+
+This java-based extension for Inkscape facilitates 
+image embedding by: 
+
+-    Automatically identifying all linked images.
+-    Cropping image data that lies outside the images'
+     clipping frame.
+-    Optionally applying jpeg compression.
+-    Writing the cropped and possibly compressed image
+     data directly in the SVG file.
+
+By cropping image data that lies outside the clipping frame
+or applying jpeg compression,
+the resulting file size can be reduced significantly.
+Alternatively, if preserving image quality is a priority 
+jpeg compression can be explicitly avoided.
+
+The plugin uses [ImageJ](http://rsbweb.nih.gov/ij/)
+to load and manipulate the image data and
+the Apache Commons Codec library to encode
+the data for embedding.
+
+
+Installing the Inkscape Extension
+---------------------------------
+
+**Requirements**
+
+-    Inkscape 0.48 or newer
+-    Java SE6 or newer
+
+**Option 1: Build from source**
+
+Clone the Git repository from GitHub and build the 
+project using [Maven](http://maven.apache.org/index.html):
+`$ mvn package`.  Then unpack either 
+`target/svg-embed-and-crop-<ver>-distr.zip` or 
+`target/svg-embed-and-crop-<ver>-distr.tar.gz` 
+as described below.
+
+**Option 2: Download compiled binaries**
+
+For Windows: [${project.build.finalName}-distr.zip](../${project.build.finalName}-distr.zip)
+
+For Mac or Linux: [${project.build.finalName}-distr.tar.gz](../${project.build.finalName}-distr.tar.gz)
+
+**Installation**
+
+Unpack the entire contents of the archive to 
+the [Inkscape extension directory](http://wiki.inkscape.org/wiki/index.php/ScriptingHOWTO#Installing).
+
+For Windows, this is probably something like:    
+`C:\Users\<your user name>\AppData\Roaming\inkscape\extensions\`
+
+For Mac or Linux, this is probably something like:    
+`$HOME/.config/inkscape/extensions/`
+
+Run Inkscape. If it was already running,
+you will have to restart it. The plugin can
+be run from the menu:   
+`Extensions > Images > Embed and crop images`
+
+
+Known Issues
+------------
+
+-    Images that have already been embedded are ignored.
+
+-    Only clipping planes created from rectangles are
+     currently supported.
+
+Questions? bnanes () emory , edu
+
+
+Running from the Command Line
+-----------------------------
+
+It is possible to run the app directly from
+the command line without running Inkscape:
+
+`$ java -classpath svg-embed-and-crop/* edu.emory.cellbio.svg.EmbedAndCrop`
+

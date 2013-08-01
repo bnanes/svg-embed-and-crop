@@ -14,6 +14,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   </properties>
+  
      <build>
           <plugins>
                <plugin>
@@ -35,8 +36,49 @@
                          </execution>
                     </executions>
                </plugin>
+               
+               <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-site-plugin</artifactId>
+                    <version>3.3</version>
+                    <executions>
+                         <execution>
+                              <id>gen-site</id>
+                              <phase>package</phase>
+                              <goals>
+                                   <goal>site</goal>
+                              </goals>
+                         </execution>
+                    </executions>
+               </plugin>
+               
           </plugins>
      </build>
+     
+     <reporting>
+          <plugins>  
+               <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-project-info-reports-plugin</artifactId>
+                    <version>2.7</version>
+                    <reportSets>
+                         <reportSet>
+                              <reports>
+                              </reports>
+                         </reportSet>
+                    </reportSets>
+               </plugin>
+               <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-javadoc-plugin</artifactId>
+                    <version>2.9.1</version>
+                    <configuration>
+                         <show>private</show>
+                    </configuration>
+               </plugin>
+          </plugins>
+     </reporting>
+     
   <dependencies>
     <dependency>
       <groupId>commons-codec</groupId>
