@@ -45,16 +45,13 @@ Installing the Inkscape Extension
 
 Clone the Git repository from GitHub and build the 
 project using [Maven](http://maven.apache.org/index.html):
-`$ mvn package`.  Then unpack either 
-`target/svg-embed-and-crop-<ver>-distr.zip` or 
-`target/svg-embed-and-crop-<ver>-distr.tar.gz` 
+`$ mvn package`.  Then unpack 
+`target/svg-embed-and-crop-<ver>-distr.zip` 
 as described below.
 
 **Option 2: Download compiled binaries**
 
-For Windows: [${project.build.finalName}-distr.zip](../${project.build.finalName}-distr.zip)
-
-For Mac or Linux: [${project.build.finalName}-distr.tar.gz](../${project.build.finalName}-distr.tar.gz)
+[${project.build.finalName}-distr.zip](${project.build.finalName}-distr.zip)
 
 **Installation**
 
@@ -80,8 +77,6 @@ Known Issues
 
 -    Only clipping planes created from rectangles are
      currently supported.
-
-Questions? bnanes () emory , edu
 
 
 Running from the Command Line

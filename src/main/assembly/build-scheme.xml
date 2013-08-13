@@ -6,7 +6,6 @@
      <id>distr</id>
      <formats>
           <format>zip</format>
-          <format>tar.gz</format>
      </formats>
      <includeBaseDirectory>false</includeBaseDirectory>
      <fileSets>
