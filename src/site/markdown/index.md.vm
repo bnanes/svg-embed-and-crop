@@ -90,5 +90,30 @@ Running from the Command Line
 It is possible to run the app directly from
 the command line without running Inkscape:
 
-`$ java -classpath svg-embed-and-crop/* edu.emory.cellbio.svg.EmbedAndCrop`
+<pre>java -classpath &lt;<em>install path</em>&gt; edu.emory.cellbio.svg.EmbedAndCrop
+      [&lt;<em>input</em>&gt;] [-o &lt;<em>output</em>&gt; | -s] [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]]</pre>
 
+-    <code>&lt;<em>install path</em>&gt;</code> --
+          Location of the app's jar files, ending with `/*`.  
+          Ex.: `/usr/some-dir/svg-embed-and-crop/*`
+-    <code>&lt;<em>input</em>&gt;</code> --
+          Path to the input SVG file. If missing, the user will be presented with
+          a file open dialog box.
+-    <code>-o &lt;<em>output</em>&gt;</code> --
+          Path to save the output SVG file with embeded images
+-    `-s` -- Present the user with a file save dialog
+          to specify the output file
+-    **Note:** If neither `-o` nor `-s` is specified, the output 
+          is sent to the standard output stream
+-    <code>-t &lt;<em>type</em>&gt;</code> --
+          Specify the type of image for encoding. Supported options
+          are `png` or `jpeg`. If this is not specified, the user
+          will be presented with a selection dialog.
+-    <code>-q &lt;<em>quality</em>&gt;</code> --
+          Quality parameter for jpeg compression.
+          Default value is `0.85`.
+
+**Examples:**
+
+    java -classpath /path/to/jars/* edu.emory.cellbio.svg.EmbedAndCrop -s -t jpeg -q 0.95
+    java -classpath /path/to/jars/* edu.emory.cellbio.svg.EmbedAndCrop input.svg -o output.svg

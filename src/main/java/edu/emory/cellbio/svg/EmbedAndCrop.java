@@ -64,38 +64,91 @@ public class EmbedAndCrop
      
      /**
       * Run the extension
-      * @param args
-      *   <br>- The first argument should be the path of the
-      *   source svg file
-      *   <br>- The second (optional) command should be the image file type
-      *   <br>- The third (optional, but required if a file type is given)
-      *        command should be the compression quality.
-      *   <br><br>Example: "file.svg" "jpeg" "0.95" or "file.svg" "png" "1"
+      * @param args <b>Command line arguments</b>
+      *   <br>
+      *   <code> [&lt;<em>input</em>&gt;] 
+      *          [-o &lt;<em>output</em>&gt; | -s] 
+      *          [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]]
+      *   </code>
+      *   <ul>
+      *   <li>  <code>&lt;<em>input</em>&gt; </code>
+      *         Path to the input SVG file.
+      *         If missing, the user will be presented with
+      *         a file open dialog box.
+      *   <li>  <code>-o &lt;<em>output</em>&gt; </code>
+      *         Path to save the output
+      *         SVG file with embeded images
+      *   <li>  <code>-s </code>
+      *         Present the user with a file save dialog
+      *         to specify the output file
+      *   <br>  <em>Note:</em> If neither <code>-o</code> nor <code>-s</code>
+      *         is specified, the output is sent to the
+      *         standard output stream
+      *   <li>  <code>-t &lt;<em>type</em>&gt; </code>
+      *         Specify the type of image for encoding.
+      *         Supported options are <code>png</code> or <code>jpeg</code>.
+      *         If this is not specified, the user will
+      *         be presented with a selection dialog.
+      *   <li>  <code>-q &lt;<em>quality</em>&gt; </code>
+      *         Quality parameter for jpeg compression.
+      *         Default value is <code>0.85</code>.
+      *   </ul>
+      *   Examples:
+      *   <br> <code> input.svg -s -t jpeg -q 0.95 </code>
+      *   <br> <code> input.svg -o output.svg </code>
       */
      public void runInkscapeExtension(String[] args) {
           File input = null;
-          if(args == null || args.length<1) {
-               System.err.println("Missing command line arguments");
-               input = openDialog();
-          }
+          File output = null;
+          boolean saveAs = false;
           try {
-               if(input == null && args != null)
-                    input = new File(args[0]);
-               if(args != null && !(args.length < 3)) {
-                    imgFileType = args[1];
-                    try{ compQual = Float.parseFloat(args[2]); }
-                    catch(NumberFormatException e){ throw new EmbedAndCropException(e.toString()); }
+               boolean typeLoaded = false;
+               if(args != null) {
+                    for(int i=0; i<args.length; i++) {
+                         final String token = args[i].trim();
+                         final String next = args.length > i+1 ? args[i+1] : null;
+                         if(token == null || token.isEmpty())
+                              continue;
+                         if(token.equals("-o") && next != null) {
+                              output = new File(next);
+                              i++;
+                         }
+                         else if(token.equals("-s"))
+                              saveAs = true;
+                         else if(token.equals("-t") && next != null) {
+                              imgFileType = next;
+                              typeLoaded = true;
+                              i++;
+                         }
+                         else if(token.equals("-q") && next != null) {
+                              if(!typeLoaded)
+                                   throw new EmbedAndCropException
+                                        ("Can't set quality without image type");
+                              compQual = Float.parseFloat(next);
+                              i++;
+                         }
+                         else if(i == 0)
+                              input = new File(token);
+                    }
                }
-               else getOutputParams();
+               if(input == null)
+                    input = openDialog();
+               if(!typeLoaded)
+                    getOutputParams();
                if(input == null || !input.canRead())
                     throw new EmbedAndCropException("Can't read temporary input file "
                          + input != null ? input.getPath() : "<null>");
                Document dom = readSVG(input);
                process(dom);
-               SVGToStream(dom, System.out);
+               if(saveAs)
+                    saveAs(dom);
+               else if(output != null)
+                    save(dom, output);
+               else
+                    SVGToStream(dom, System.out);
           } catch(Throwable t) {
                t.printStackTrace();
-               JOptionPane.showMessageDialog(null, t.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+               JOptionPane.showMessageDialog(null, t.getMessage(), "Error: " + t.getMessage(), JOptionPane.ERROR_MESSAGE);
                System.exit(1);
           }
           System.exit(0);
@@ -660,12 +713,8 @@ public class EmbedAndCrop
      }
      
      public static void main( String[] args ) {
-        if(args != null)
-          for(int i=0; i<args.length; i++)
-               System.err.println(args[i]);
-        System.out.println( "Hello World!" );
         EmbedAndCrop ec = new EmbedAndCrop();
-        try{ ec.test(); }
+        try{ ec.runInkscapeExtension(args); }
         catch(Throwable t) {
              t.printStackTrace();
              JOptionPane.showMessageDialog(null, t.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
