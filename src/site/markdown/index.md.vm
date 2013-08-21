@@ -43,7 +43,7 @@ Installing the Inkscape Extension
 
 **Option 1: Build from source**
 
-Clone the Git repository from GitHub and build the 
+Clone the [Git repository](https://github.com/bnanes/svg-embed-and-crop) from GitHub and build the 
 project using [Maven](http://maven.apache.org/index.html):
 `$ mvn package`.  Then unpack 
 `target/svg-embed-and-crop-<ver>-distr.zip` 
