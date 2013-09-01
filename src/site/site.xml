@@ -16,6 +16,8 @@
              <item name="About " href="index.html" />
              <item name="Installation " href="index.html#Installing_the_Inkscape_Extension" />
              <item name="Known Issues " href="index.html#Known_Issues" />
+             <item name="Release Notes" href="index.html#Release_Notes" />
+             <item name="Command Line" href="index.html#Running_from_the_Command_Line" />
              <item name="Javadoc " href="apidocs/index.html" />
         </menu>
         

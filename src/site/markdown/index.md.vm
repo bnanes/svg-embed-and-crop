@@ -78,6 +78,22 @@ Known Issues
 -    Only clipping planes created from rectangles are
      currently supported.
 
+-    On some 64bit Windows systems, Inkscape's  Python interpreter
+     fails to recognize the JRE, even if it is correctly
+     registered with the system. A workaround for this issue
+     is to edit `svg-embed-and-crop.py` to include an absolute
+     path to the JRE.
+
+
+Release Notes
+-------------
+
+<h3>version 1.1</h3>
+
+-    Check for the JRE in some common locations. Partial workaround
+     for problem finding system-registered JRE from 
+     32bit Python interpreter on 64bit Windows.
+
 
 Running from the Command Line
 -----------------------------
