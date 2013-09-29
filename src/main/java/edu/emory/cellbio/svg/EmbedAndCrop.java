@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import java.awt.image.BufferedImage;
+import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
 import javax.imageio.ImageWriter;
@@ -269,7 +270,7 @@ public class EmbedAndCrop
                }
                ImageOutputStream ios = ImageIO.createImageOutputStream(out64);
                iw.setOutput(ios);
-               iw.write(cropImg);
+               iw.write(null, new IIOImage(cropImg, null, null), iwp);
                ios.close();
                out64.close();
           }
