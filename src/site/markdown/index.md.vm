@@ -27,11 +27,15 @@ the resulting file size can be reduced significantly.
 Alternatively, if preserving image quality is a priority 
 jpeg compression can be explicitly avoided.
 
-The plugin uses [ImageJ](http://rsbweb.nih.gov/ij/)
+The extension uses [ImageJ](http://rsbweb.nih.gov/ij/)
 to load and manipulate the image data and
-the Apache Commons Codec library to encode
-the data for embedding.
+the [Apache Commons Codec](http://commons.apache.org/proper/commons-codec/)
+library to encode the data for embedding.
 
+This extension was developed to help produce
+[publication quality figures for scientific journals](../figures/).
+Comments and suggestions are welcome:    
+**Benjamin Nanes**, <img height="14px" src="../img/emvec.svg"/>
 
 Installing the Inkscape Extension
 ---------------------------------
@@ -49,7 +53,7 @@ project using [Maven](http://maven.apache.org/index.html):
 `target/svg-embed-and-crop-<ver>-distr.zip` 
 as described below.
 
-**Option 2: Download compiled binaries**
+**Option 2: Download compiled app**
 
 [${project.build.finalName}-distr.zip](${project.build.finalName}-distr.zip)
 
@@ -62,7 +66,7 @@ For Windows, this is probably something like:
 `C:\Users\<your user name>\AppData\Roaming\inkscape\extensions\`
 
 For Mac or Linux, this is probably something like:    
-`$HOME/.config/inkscape/extensions/`
+`~/.config/inkscape/extensions/`
 
 Run Inkscape. If it was already running,
 you will have to restart it. The plugin can
@@ -78,6 +82,13 @@ Known Issues
 -    Only clipping planes created from rectangles are
      currently supported.
 
+-    PDFs saved from Inkscape will not include jpeg compression,
+     even if images are embedded in the SVG as jpegs. Additional
+     information is available [here](https://bugs.launchpad.net/inkscape/+bug/168708).
+     A workaround is to embed images without compression,
+     export a PDF, then compress images in the PDF using
+     [The PDF Shrinker](../shrink-pdf.html).
+
 -    On some 64bit Windows systems, Inkscape's  Python interpreter
      fails to recognize the JRE, even if it is correctly
      registered with the system. A workaround for this issue
@@ -87,6 +98,11 @@ Known Issues
 
 Release Notes
 -------------
+
+<h3>version 1.2</h3>
+
+-    Fixed bug which resulted in non-default compression quality parameters
+     being ignored.
 
 <h3>version 1.1</h3>
 

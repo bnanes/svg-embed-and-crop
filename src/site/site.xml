@@ -10,9 +10,13 @@
         <publishDate position="none"/>
         <version position="none"/>
         
-    <body>    
+    <body>
         
-        <menu name="Pages">
+        <head>
+            <meta name="author" content="Benjamin Nanes" />
+        </head>
+        
+        <menu name="Sections">
              <item name="About " href="index.html" />
              <item name="Installation " href="index.html#Installing_the_Inkscape_Extension" />
              <item name="Known Issues " href="index.html#Known_Issues" />
