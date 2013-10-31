@@ -63,7 +63,10 @@ Unpack the entire contents of the archive to
 the [Inkscape extension directory](http://wiki.inkscape.org/wiki/index.php/ScriptingHOWTO#Installing).
 
 For Windows, this is probably something like:    
-`C:\Users\<your user name>\AppData\Roaming\inkscape\extensions\`
+`C:\Users\<your user name>\AppData\Roaming\inkscape\extensions\`    
+Note that the `AppData` directory may be hidden in the file manager.
+If this is the case, it can be accessed by manually entering the path
+in the address bar.
 
 For Mac or Linux, this is probably something like:    
 `~/.config/inkscape/extensions/`
