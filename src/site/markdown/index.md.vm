@@ -47,7 +47,7 @@ Installing the Inkscape Extension
 
 **Option 1: Build from source**
 
-Clone the [Git repository](https://github.com/bnanes/svg-embed-and-crop) from GitHub and build the 
+Get the <a id="git" href='https://github.com/bnanes/svg-embed-and-crop'>code</a> and build the 
 project using [Maven](http://maven.apache.org/index.html):
 `$ mvn package`.  Then unpack 
 `target/svg-embed-and-crop-<ver>-distr.zip` 
@@ -55,7 +55,7 @@ as described below.
 
 **Option 2: Download compiled app**
 
-[${project.build.finalName}-distr.zip](${project.build.finalName}-distr.zip)
+<a id="svg-embed-crop-zip" href='${project.build.finalName}-distr.zip'>${project.build.finalName}-distr.zip</a>
 
 **Installation**
 
@@ -147,3 +147,5 @@ the command line without running Inkscape:
 
     java -classpath /path/to/jars/* edu.emory.cellbio.svg.EmbedAndCrop -s -t jpeg -q 0.95
     java -classpath /path/to/jars/* edu.emory.cellbio.svg.EmbedAndCrop input.svg -o output.svg
+
+<script type="text/javascript" src="./js/analytics.js" />
