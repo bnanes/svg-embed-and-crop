@@ -29,4 +29,4 @@ to load and manipulate the image data and
 the Apache Commons Codec library to encode
 the data for embedding.
 
-**[Installation instructions and documentation](http://userwww.service.emory.edu/~bnanes/svg-embed-and-crop/)**
+**[Installation instructions and documentation](http://cellbio.emory.edu/bnanes/svg-embed-and-crop/)**
