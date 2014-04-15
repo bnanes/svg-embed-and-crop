@@ -103,6 +103,44 @@ public class EmbedAndCrop
           File output = null;
           boolean saveAs = false;
           try {
+               parseArgs(args);
+          } catch(Throwable t) {
+               t.printStackTrace();
+               JOptionPane.showMessageDialog(null, t.getMessage(), "Error: " + t.getMessage(), JOptionPane.ERROR_MESSAGE);
+               System.exit(1);
+          }
+          System.exit(0);
+     }
+     
+     /**
+      * Run the extension, but do not exit the JVM when finished.
+      * This method allows an alternate entry point to allow
+      * use of the extension programmatically, rather than from
+      * Inkscape or the command line.
+      * 
+      * @see #runInkscapeExtension(java.lang.String[]) 
+      */
+     public boolean runWithoutExit(String[] args) {
+          File input = null;
+          File output = null;
+          boolean saveAs = false;
+          try {
+               parseArgs(args);
+          } catch(Throwable t) {
+               t.printStackTrace();
+               JOptionPane.showMessageDialog(null, t.getMessage(), "Error: " + t.getMessage(), JOptionPane.ERROR_MESSAGE);
+               return false;
+          }
+          return true;
+     }
+     
+     // -- Helper methods --
+     
+     private void parseArgs(String[] args) {
+          File input = null;
+          File output = null;
+          boolean saveAs = false;
+          try {
                boolean typeLoaded = false;
                if(args != null) {
                     for(int i=0; i<args.length; i++) {
@@ -147,15 +185,10 @@ public class EmbedAndCrop
                     save(dom, output);
                else
                     SVGToStream(dom, System.out);
-          } catch(Throwable t) {
-               t.printStackTrace();
-               JOptionPane.showMessageDialog(null, t.getMessage(), "Error: " + t.getMessage(), JOptionPane.ERROR_MESSAGE);
-               System.exit(1);
+          } catch(Exception e) {
+              throw new RuntimeException(e);
           }
-          System.exit(0);
      }
-     
-     // -- Helper methods --
      
      /** Process an SVG DOM */
      private void process(Document dom) throws EmbedAndCropException {
