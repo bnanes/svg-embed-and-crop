@@ -102,6 +102,10 @@ Known Issues
 Release Notes
 -------------
 
+<h3>version 1.4</h3>
+
+-    Fixed bug affecting rotation and skew transformations.
+
 <h3>version 1.3</h3>
 
 -    Fixed bug causing Java to exit when calling the

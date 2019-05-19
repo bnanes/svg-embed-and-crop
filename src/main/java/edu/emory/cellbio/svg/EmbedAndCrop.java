@@ -660,6 +660,7 @@ public class EmbedAndCrop
       * @return {@code {x,y}}
       */
      private double[] transformRotate(double[] point, double a) {
+          a = a * Math.PI / 180;
           double[] matrix = {Math.cos(a), -Math.sin(a), 0, Math.sin(a), Math.cos(a), 0};
           return transformMatrix(point, matrix);
      }
@@ -681,6 +682,7 @@ public class EmbedAndCrop
       * @return {@code {x,y}}
       */
      private double[] transformSkewX(double[] point, double a) {
+          a = a * Math.PI / 180;
           double[] matrix = {1, Math.tan(a), 0, 0,1,0};
           return transformMatrix(point, matrix);
      }
@@ -692,6 +694,7 @@ public class EmbedAndCrop
       * @return {@code {x,y}}
       */
      private double[] transformSkewY(double[] point, double a) {
+          a = a * Math.PI / 180;
           double[] matrix = {1,0,0, Math.tan(a),1,0};
           return transformMatrix(point, matrix);
      }
