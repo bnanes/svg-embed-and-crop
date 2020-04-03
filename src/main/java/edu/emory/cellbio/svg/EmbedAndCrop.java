@@ -178,7 +178,7 @@ public class EmbedAndCrop
                     throw new EmbedAndCropException("Can't read temporary input file "
                          + input != null ? input.getPath() : "<null>");
                Document dom = readSVG(input);
-               process(dom);
+               process(dom, input.getParent());
                if(saveAs)
                     saveAs(dom);
                else if(output != null)
@@ -191,17 +191,17 @@ public class EmbedAndCrop
      }
      
      /** Process an SVG DOM */
-     private void process(Document dom) throws EmbedAndCropException {
+     private void process(Document dom, String basePath) throws EmbedAndCropException {
           NodeList images = dom.getElementsByTagName("image");
           for(int i=0; i<images.getLength(); i++) {
                Node img = images.item(i);
                if(img.getNodeType() == Node.ELEMENT_NODE) {
                     Element clip = getClipPath((Element)img, dom);
                     if(clip != null) {
-                         processImg((Element)img, clip);
+                         processImg((Element)img, clip, basePath);
                     }
                     else
-                         processImg((Element)img, null);
+                         processImg((Element)img, null, basePath);
                }
           }
      }
@@ -250,11 +250,11 @@ public class EmbedAndCrop
      }
      
      /** Process an image element */
-     private void processImg(Element img, Element clip) throws EmbedAndCropException {
+     private void processImg(Element img, Element clip, String basePath) throws EmbedAndCropException {
           double[] cf = {0,0,0,0};
           if(clip != null)
                cf = getCropFraction(img, clip);
-          putImgData(img, cf);
+          putImgData(img, cf, basePath);
      }
      
      /**
@@ -262,7 +262,7 @@ public class EmbedAndCrop
       * @param img Image element
       * @param crop Fraction of image to crop from each edge, {@code {top, bottom, left, right}}
       */
-     private void putImgData(Element img, double[] crop) throws EmbedAndCropException {
+     private void putImgData(Element img, double[] crop, String basePath) throws EmbedAndCropException {
           String path = img.getAttribute("xlink:href");
           if(path == null || path.equals(""))
                throw new EmbedAndCropException("No image file listed!");
@@ -270,11 +270,13 @@ public class EmbedAndCrop
                path = path.substring(8);
           path = path.replace("%20", " ");
           File imf = new File(path);
+          if(!imf.isAbsolute())
+              imf = new File(basePath, path);
           if(!imf.canRead())
                throw new EmbedAndCropException("Can't read file link: " + path);
           BufferedImage origImg;
           try{
-               origImg = IJ.openImage(path).getBufferedImage();
+               origImg = IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
           }
           catch(Throwable t) { throw new EmbedAndCropException("Problem reading image file; " + t); }
           if(origImg == null)
@@ -745,7 +747,7 @@ public class EmbedAndCrop
      public void test() throws EmbedAndCropException {
           Document dom = readSVG(openDialog());
           getOutputParams();
-          process(dom);
+          process(dom, "");
           saveAs(dom);
      }
      
