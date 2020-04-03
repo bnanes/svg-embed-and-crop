@@ -34,8 +34,7 @@ library to encode the data for embedding.
 
 This extension was developed to help produce
 [publication quality figures for scientific journals](../figures/).
-Comments and suggestions are welcome:    
-**Benjamin Nanes**, <img height="14px" src="../img/emvec.svg"/>
+Comments and suggestions are welcome via [Github](https://github.com/bnanes/svg-embed-and-crop).
 
 Installing the Inkscape Extension
 ---------------------------------
@@ -43,7 +42,7 @@ Installing the Inkscape Extension
 **Requirements**
 
 -    Inkscape 0.48 or newer
--    Java SE6 or newer
+-    Java SE8 or newer
 
 **Option 1: Build from source**
 
@@ -85,7 +84,7 @@ Known Issues
 -    Only clipping planes created from rectangles are
      currently supported.
 
--    PDFs saved from Inkscape will not include jpeg compression,
+-    PDFs saved from Inkscape may not include jpeg compression,
      even if images are embedded in the SVG as jpegs. Additional
      information is available [here](https://bugs.launchpad.net/inkscape/+bug/168708).
      A workaround is to embed images without compression,
@@ -101,6 +100,12 @@ Known Issues
 
 Release Notes
 -------------
+
+<h3>version 1.5</h3>
+
+-    Fix resolution of certain relative image paths.
+-    Allow output files to be created in new directories.
+-    Update initiation script for compatibility with Inkscape 1.0.
 
 <h3>version 1.4</h3>
 
@@ -156,5 +161,3 @@ the command line without running Inkscape:
 
     java -classpath /path/to/jars/* edu.emory.cellbio.svg.EmbedAndCrop -s -t jpeg -q 0.95
     java -classpath /path/to/jars/* edu.emory.cellbio.svg.EmbedAndCrop input.svg -o output.svg
-
-<script type="text/javascript" src="./js/analytics.js" />
