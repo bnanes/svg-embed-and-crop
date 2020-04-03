@@ -243,6 +243,7 @@ public class EmbedAndCrop
      /** Save an XML(SVG) file */
      private void save(Document dom, File f) throws EmbedAndCropException {
           try{
+               f.getParentFile().mkdirs();
                Transformer xmlt = TransformerFactory.newInstance().newTransformer();
                xmlt.setOutputProperty(OutputKeys.METHOD, "xml");
                xmlt.transform(new DOMSource(dom), new StreamResult(f));
