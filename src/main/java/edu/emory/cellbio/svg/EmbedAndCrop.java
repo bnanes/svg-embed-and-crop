@@ -267,6 +267,9 @@ public class EmbedAndCrop
           String path = img.getAttribute("xlink:href");
           if(path == null || path.equals(""))
                throw new EmbedAndCropException("No image file listed!");
+          if(path.startsWith("data:image")) {
+              return; // Skip already embeded images
+          }
           if(path.startsWith("file:///"))
                path = path.substring(8);
           path = path.replace("%20", " ");
@@ -584,7 +587,7 @@ public class EmbedAndCrop
                     if(u.length > 1)
                          sy = new Double(u[1]);
                     else
-                         sy = 1;
+                         sy = new Double(u[0]);
                     point = transformScale(point, sx, sy);
                }
                
