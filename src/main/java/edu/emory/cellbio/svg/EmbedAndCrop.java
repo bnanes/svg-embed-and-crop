@@ -2,6 +2,8 @@ package edu.emory.cellbio.svg;
 
 import ij.IJ;
 
+import java.awt.geom.AffineTransform;
+import java.awt.image.AffineTransformOp;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
@@ -60,6 +62,8 @@ public class EmbedAndCrop
      
      private String imgFileType = "png";
      private float compQual = 0.8f;
+     private boolean doResampling = false;
+     private double maxRes = 11.811; // px/mm (default is ~300dpi)
      
      // -- Methods --
      
@@ -70,6 +74,7 @@ public class EmbedAndCrop
       *   <code> [&lt;<em>input</em>&gt;] 
       *          [-o &lt;<em>output</em>&gt; | -s] 
       *          [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]]
+      *          [-r [&lt;<em>resolution</em>&gt;]]
       *   </code>
       *   <ul>
       *   <li>  <code>&lt;<em>input</em>&gt; </code>
@@ -78,7 +83,7 @@ public class EmbedAndCrop
       *         a file open dialog box.
       *   <li>  <code>-o &lt;<em>output</em>&gt; </code>
       *         Path to save the output
-      *         SVG file with embeded images
+      *         SVG file with embedded images
       *   <li>  <code>-s </code>
       *         Present the user with a file save dialog
       *         to specify the output file
@@ -93,6 +98,12 @@ public class EmbedAndCrop
       *   <li>  <code>-q &lt;<em>quality</em>&gt; </code>
       *         Quality parameter for jpeg compression.
       *         Default value is <code>0.85</code>.
+      *   <li>  <code>-r &lt;<em>resolution</em>&gt; </code>
+      *         Maximum image resolution, in pixels per mm.
+      *         Higher resolution images will be downsampled.
+      *         If this flag is not given, no resampling will be done.
+      *         If this flag is given, but no resolution is provided,
+      *         the default value is <code>11.811</code>, approximately equal to 300dpi.
       *   </ul>
       *   Examples:
       *   <br> <code> input.svg -s -t jpeg -q 0.95 </code>
@@ -165,6 +176,12 @@ public class EmbedAndCrop
                                         ("Can't set quality without image type");
                               compQual = Float.parseFloat(next);
                               i++;
+                         } 
+                         else if(token.equals("-r")) {
+                             if(next != null)
+                                maxRes = Double.parseDouble(next);
+                             doResampling = true;
+                             i++;
                          }
                          else if(i == 0)
                               input = new File(token);
@@ -294,6 +311,13 @@ public class EmbedAndCrop
           BufferedImage cropImg = origImg.getSubimage(
                icrop[2], icrop[0],
                w - icrop[2] - icrop[3], h - icrop[0] - icrop[1]);
+          double[] acrop = { ((double)icrop[0])/h, ((double)icrop[1])/h,
+                             ((double)icrop[2])/w, ((double)icrop[3])/w };
+          adjustImgPlacement(img, acrop);
+          if(doResampling) {
+                double croppedWidth = Double.parseDouble(img.getAttribute("width"));
+                cropImg = limitResolution(cropImg, croppedWidth, maxRes);
+          }
           ByteArrayOutputStream baos = new ByteArrayOutputStream();
           Base64OutputStream out64 = new Base64OutputStream(baos);
           try{
@@ -316,9 +340,6 @@ public class EmbedAndCrop
           catch(Throwable t) { throw new EmbedAndCropException("Problem writing/encoding image data; " + t); }
           
           String result = "data:image/" + imgFileType + ";base64," + baos.toString();
-          double[] acrop = { ((double)icrop[0])/h, ((double)icrop[1])/h,
-                             ((double)icrop[2])/w, ((double)icrop[3])/w };
-          adjustImgPlacement(img, acrop);
           img.setAttribute("xlink:href", result);
      }
      
@@ -341,6 +362,29 @@ public class EmbedAndCrop
           img.setAttribute("y", String.valueOf(ny));
           img.setAttribute("width", String.valueOf(nw));
           img.setAttribute("height", String.valueOf(nh));
+     }
+     
+     /**
+      * Down-sample an image if above a maximum resolution
+      * 
+      * @param I Source image
+      * @param w Image width (physical units)
+      * @param r Limiting resolution (pixels per physical unit)
+      * @return A resampled image with the lowest possible resolution 
+      *     not less than r, or the source image unchanged if the
+      *     source image resolution is less than or equal to r.
+      */
+     private BufferedImage limitResolution(BufferedImage I, double w, double r) {
+         if(I.getWidth() / w > r) {
+             double s = Math.ceil(r * w) / I.getWidth();
+             AffineTransformOp ato = new AffineTransformOp(
+                     AffineTransform.getScaleInstance(s, s), AffineTransformOp.TYPE_BICUBIC);
+             BufferedImage J = ato.createCompatibleDestImage(I, I.getColorModel());
+             ato.filter(I, J);
+             return J;
+         } else {
+             return I;
+         }
      }
      
      /**
