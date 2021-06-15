@@ -290,6 +290,7 @@ public class EmbedAndCrop
           if(path.startsWith("file:///"))
                path = path.substring(8);
           path = path.replace("%20", " ");
+          path = path.replace("%5C", "\\");
           File imf = new File(path);
           if(!imf.isAbsolute())
               imf = new File(basePath, path);
