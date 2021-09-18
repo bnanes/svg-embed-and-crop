@@ -234,7 +234,7 @@ public class EmbedAndCrop
           } catch(Throwable t) { throw new EmbedAndCropException("XML write error: " + t); }
      }
      
-     /** Harvest output parameters */
+     /** Harvest output parameters from dialog */
      private void getOutputParams() throws EmbedAndCropException {
           OutputParamDialog opd = new OutputParamDialog();
           opd.showAndWait();
@@ -242,6 +242,8 @@ public class EmbedAndCrop
                throw new EmbedAndCropException("Canceled by user");
           imgFileType = opd.getImgFileMode();
           compQual = opd.getCompressionQuality();
+          doResampling = opd.getDoResample();
+          maxRes = opd.getResampleLevel();
      }
      
      /** Save an XML(SVG) file */

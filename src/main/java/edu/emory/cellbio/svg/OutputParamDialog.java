@@ -13,6 +13,7 @@ import javax.swing.JLabel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 
 /**
@@ -27,6 +28,9 @@ public class OutputParamDialog extends JDialog implements ActionListener {
      private JComboBox imgFileMode;
      private JLabel compQualLabel;
      private JSpinner compQual;
+     private JLabel resampLabel;
+     private JCheckBox resampCheck;
+     private JSpinner resampLevel;
      private JButton ok;
      private JButton cancel;
      
@@ -91,6 +95,16 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           return ((Double)compQual.getModel().getValue()).floatValue();
      }
      
+     /** Get the selected resampling option */
+     public boolean getDoResample() {
+         return resampCheck.getModel().isSelected();
+     }
+     
+     /** Get the selected resampling level */
+     public float getResampleLevel() {
+         return ((Double)resampLevel.getModel().getValue()).floatValue();
+     }
+     
      // -- Helper methods --
      
      private void setup() {
@@ -115,6 +129,10 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           compQual = new JSpinner(new SpinnerNumberModel(0.8f, 0.0f, 1.0f, 0.1f));
           compQual.setAlignmentX(Component.LEFT_ALIGNMENT);
           compQual.setEnabled(imgFileMode.getSelectedIndex() == 1);
+          resampLabel = new JLabel("Max resolution (px/mm):");
+          resampCheck = new JCheckBox("Do resampling?");
+          resampLevel = new JSpinner(new SpinnerNumberModel(11.811f, 0.0f, 1000.0f, 0.1f));
+          resampLevel.setAlignmentX(Component.LEFT_ALIGNMENT);
           JPanel buttons = new JPanel();
           buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
           buttons.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -128,12 +146,17 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           buttons.add(ok);
           buttons.add(Box.createHorizontalStrut(10));
           buttons.add(cancel);
+          
           add(Box.createVerticalStrut(5));
           add(imgFileLabel);
           add(imgFileMode);
           add(Box.createVerticalStrut(10));
           add(compQualLabel);
           add(compQual);
+          add(Box.createVerticalStrut(10));
+          add(resampCheck);
+          add(resampLabel);
+          add(resampLevel);
           add(Box.createVerticalStrut(10));
           add(buttons);
           add(Box.createVerticalStrut(5));
