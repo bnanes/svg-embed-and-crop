@@ -44,14 +44,15 @@ import org.apache.commons.codec.binary.Base64OutputStream;
  * <li> Cropping image data that lies outside the images'
  * clipping frame.
  * <li> Optionally applying jpeg compression.
+ * <li> Optionally resampling images.
  * <li> Writing the cropped and possibly compressed image
  * data directly in the SVG file.
  * </ul>
- * <p> By cropping image data that lies outside the clipping 
- * frame or applying jpeg compression, the resulting file 
- * size can be reduced significantly. Alternatively, if 
- * preserving image quality is a priority  jpeg compression 
- * can be explicitly avoided.
+ * <p> By cropping image data that lies outside the clipping frame, 
+ * applying jpeg compression, or resampling to lower resolution,
+ * the resulting file size can be reduced significantly.
+ * If preserving image quality is a priority 
+ * jpeg compression and resampling can be explicitly avoided.
  * 
  * @author Benjamin Nanes
  */
