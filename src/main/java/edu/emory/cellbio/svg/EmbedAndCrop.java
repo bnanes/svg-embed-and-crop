@@ -118,6 +118,9 @@ public class EmbedAndCrop
                parseArgs(args);
           } catch(Throwable t) {
                t.printStackTrace();
+               if(t.getMessage().contains("Canceled by user")) {
+                   System.exit(0);
+               }
                JOptionPane.showMessageDialog(null, t.getMessage(), "Error: " + t.getMessage(), JOptionPane.ERROR_MESSAGE);
                System.exit(1);
           }

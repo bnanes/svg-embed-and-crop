@@ -27,6 +27,8 @@ class EmbedAndCrop(inkex.CallExtension):
 		cp = os.path.dirname(os.path.abspath(__file__)) + "/svg-embed-and-crop/*"
 		java = "javaw -cp \""
 		command.call('javaw', '-cp', cp, 'edu.emory.cellbio.svg.EmbedAndCropInkscapeEntry', input_file, "-o", output_file)
+		if not os.path.exists(output_file):
+			raise inkex.AbortExtension("Plugin canceled")
 		return output_file
 
 if __name__ == '__main__':
