@@ -10,7 +10,7 @@ try:
 	from inkex import command
 except ImportError:
 	# This is a hack for backwards compatability with Inkscape versions <1.0
-	cp = os.path.expandvars("${APPDATA}/inkscape/extensions/svg-embed-and-crop/*")
+	cp = os.path.dirname(os.path.abspath(__file__)) + "/svg-embed-and-crop/*"
 	if len(sys.argv) > 1:
 		f = sys.argv[1]
 	else:
@@ -29,10 +29,8 @@ class EmbedAndCrop(inkex.CallExtension):
 	"""Embed and Crop Images"""
 
 	def call(self, input_file, output_file):
-		cp = os.path.expandvars("${APPDATA}/inkscape/extensions/svg-embed-and-crop/*")
+		cp = os.path.dirname(os.path.abspath(__file__)) + "/svg-embed-and-crop/*"
 		java = "javaw -cp \""
-		#p = subprocess.Popen(java + cp + "\" edu.emory.cellbio.svg.EmbedAndCropInkscapeEntry " + input_file, stdout=subprocess.PIPE)
-		#q = p.communicate()[0]
 		command.call('javaw', '-cp', cp, 'edu.emory.cellbio.svg.EmbedAndCropInkscapeEntry', input_file, "-o", output_file)
 		return output_file
 
