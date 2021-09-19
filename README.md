@@ -15,14 +15,15 @@ image embedding by:
 -    Cropping image data that lies outside the images'
      clipping frame.
 -    Optionally applying jpeg compression.
+-    Optionally resampling images above a maximum resolution
 -    Writing the cropped and possibly compressed image
      data directly in the SVG file.
 
-By cropping image data that lies outside the clipping frame
-or applying jpeg compression,
+By cropping image data that lies outside the clipping frame,
+applying jpeg compression, or resampling images above a maximum resolution,
 the resulting file size can be reduced significantly.
 Alternatively, if preserving image quality is a priority 
-jpeg compression can be explicitly avoided.
+jpeg compression and resampling can be explicitly avoided.
 
 The plugin uses [ImageJ](http://rsbweb.nih.gov/ij/)
 to load and manipulate the image data and

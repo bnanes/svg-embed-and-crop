@@ -14,13 +14,13 @@ may be required as a final step in some production work-flows.
 This java-based extension for Inkscape facilitates 
 image embedding by: 
 
--    Automatically identifying all linked images.
+-    Automatically identifying all linked images
 -    Cropping image data that lies outside the images'
-     clipping frame.
--    Optionally applying jpeg compression.
--    Optionally resampling images.
+     clipping frame
+-    Optionally applying jpeg compression
+-    Optionally resampling images above a maximum resolution
 -    Writing the cropped and possibly compressed image
-     data directly in the SVG file.
+     data directly in the SVG file
 
 By cropping image data that lies outside the clipping frame, 
 applying jpeg compression, or resampling to lower resolution,
@@ -28,9 +28,9 @@ the resulting file size can be reduced significantly.
 If preserving image quality is a priority 
 jpeg compression and resampling can be explicitly avoided.
 
-The extension uses [ImageJ](http://rsbweb.nih.gov/ij/)
+The extension uses [ImageJ](https://rsbweb.nih.gov/ij/)
 to load image data and the 
-[Apache Commons Codec](http://commons.apache.org/proper/commons-codec/)
+[Apache Commons Codec](https://commons.apache.org/proper/commons-codec/)
 library to encode the data for embedding.
 
 This extension was developed to help produce
@@ -85,6 +85,14 @@ Known Issues
 -    Only clipping planes created from rectangles are
      currently supported.
 
+-    In Inkscape versions >= 1.0, non-ASCII characters in text elements
+     may be disrupted on some systems. 
+     This is dues to an issue with the new extension system; 
+     [a fix has been proposed](https://gitlab.com/inkscape/extensions/-/merge_requests/363).
+     Workarounds include using Inkscape versions < 1.0 or editing 
+     `share/inkscape/extensions/inkex/extensions.py` in your 
+     Inkscape installation as detailed [here](https://gitlab.com/inkscape/extensions/-/merge_requests/363).
+
 -    PDFs saved from Inkscape may not include jpeg compression,
      even if images are embedded in the SVG as jpegs. Additional
      information is available [here](https://bugs.launchpad.net/inkscape/+bug/168708).
@@ -101,6 +109,11 @@ Known Issues
 
 Release Notes
 -------------
+
+<h3>version 1.6</h3>
+
+-    Optionally resample images to a maximum resolution to further decrease file size.
+-    Improve compatibility with Inkscape versions >= 1.0.
 
 <h3>version 1.5</h3>
 
@@ -136,7 +149,7 @@ It is possible to run the app directly from
 the command line without running Inkscape:
 
 <pre>java -classpath &lt;<em>install path</em>&gt; edu.emory.cellbio.svg.EmbedAndCrop
-      [&lt;<em>input</em>&gt;] [-o &lt;<em>output</em>&gt; | -s] [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]]</pre>
+      [&lt;<em>input</em>&gt;] [-o &lt;<em>output</em>&gt; | -s] [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]] [-r [&lt;<em>resolution</em>&gt;]]</pre>
 
 -    <code>&lt;<em>install path</em>&gt;</code> --
           Location of the app's jar files, ending with `/*`.  
@@ -157,6 +170,12 @@ the command line without running Inkscape:
 -    <code>-q &lt;<em>quality</em>&gt;</code> --
           Quality parameter for jpeg compression.
           Default value is `0.85`.
+-    <code>-r &lt;<em>resolution</em>&gt;</code>
+          Maximum image resolution, in pixels per mm.
+          Higher resolution images will be downsampled.
+          If this flag is not given, no resampling will be done.
+          If this flag is given, but no resolution is provided,
+          the default value is <code>11.811</code>, approximately equal to 300dpi.
 
 **Examples:**
 
