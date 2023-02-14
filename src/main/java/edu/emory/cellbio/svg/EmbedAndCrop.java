@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import java.awt.image.BufferedImage;
+import java.util.Locale;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -294,7 +295,10 @@ public class EmbedAndCrop
               return; // Skip already embeded images
           }
           if(path.startsWith("file:///"))
-               path = path.substring(8);
+               if(System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).indexOf("win") > 0)
+                   path = path.substring(8);
+               else
+                   path = path.substring(7);
           path = path.replace("%20", " ");
           path = path.replace("%5C", "\\");
           File imf = new File(path);
