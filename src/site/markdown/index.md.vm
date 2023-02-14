@@ -87,13 +87,14 @@ Known Issues
 -    Only clipping planes created from rectangles are
      currently supported.
 
--    In Inkscape versions >= 1.0, non-ASCII characters in text elements
-     may be disrupted on some systems. 
-     This is dues to an issue with the new extension system; 
-     [a fix has been proposed](https://gitlab.com/inkscape/extensions/-/merge_requests/363).
-     Workarounds include using Inkscape versions < 1.0 or editing 
-     `share/inkscape/extensions/inkex/extensions.py` in your 
-     Inkscape installation as detailed [here](https://gitlab.com/inkscape/extensions/-/merge_requests/363).
+-    This extension uses the `javaw` command to run Java without opening
+     a terminal window. However, this command may be absent in some Java
+     runtimes, particularly on Linux. A workaround is to replace all 
+     instances of `javaw` with `java` in `svg-embed-and-crop.py`.
+
+-    In Inkscape versions >= 1.0 and < 1.2, non-ASCII characters in text elements
+     may be disrupted on some systems. Use older or newer Inkscape versions
+     to avoid this issue. [More information](https://gitlab.com/inkscape/extensions/-/merge_requests/363).
 
 -    PDFs saved from Inkscape may not include jpeg compression,
      even if images are embedded in the SVG as jpegs. Additional
@@ -111,6 +112,10 @@ Known Issues
 
 Release Notes
 -------------
+
+<h3>version 1.7</h3>
+
+-    Fix OS-dependent resolution of certain image paths.
 
 <h3>version 1.6</h3>
 

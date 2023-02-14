@@ -294,11 +294,12 @@ public class EmbedAndCrop
           if(path.startsWith("data:image")) {
               return; // Skip already embeded images
           }
-          if(path.startsWith("file:///"))
+          if(path.startsWith("file:///")) {
                if(System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).indexOf("win") > 0)
                    path = path.substring(8);
                else
                    path = path.substring(7);
+          }
           path = path.replace("%20", " ");
           path = path.replace("%5C", "\\");
           File imf = new File(path);
