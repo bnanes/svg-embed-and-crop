@@ -4,7 +4,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>edu.emory.cellbio</groupId>
   <artifactId>svg-embed-and-crop</artifactId>
-  <version>1.6</version>
+  <version>1.7-SNAPSHOT</version>
   <name>Embed and Crop Images Inkscape Plugin</name>
   <developers>
      <developer>
@@ -13,6 +13,8 @@
   </developers>
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <maven.compiler.source>1.8</maven.compiler.source>
+    <maven.compiler.target>1.8</maven.compiler.target>
   </properties>
   
      <build>
@@ -40,7 +42,7 @@
                <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-site-plugin</artifactId>
-                    <version>3.3</version>
+                    <version>3.10.0</version>
                     <executions>
                          <execution>
                               <id>gen-site</id>
