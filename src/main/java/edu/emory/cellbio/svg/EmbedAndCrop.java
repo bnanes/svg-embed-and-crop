@@ -309,7 +309,11 @@ public class EmbedAndCrop
                throw new EmbedAndCropException("Can't read file link: " + path);
           BufferedImage origImg;
           try{
-               origImg = IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
+            origImg = ImageIO.read(imf);
+            if(origImg == null) {
+                System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
+                origImg = IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
+            }
           }
           catch(Throwable t) { throw new EmbedAndCropException("Problem reading image file; " + t); }
           if(origImg == null)
