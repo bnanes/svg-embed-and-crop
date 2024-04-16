@@ -368,10 +368,24 @@ public class EmbedAndCrop
       *             note that this must account for rounding to pixels
       */
      private void adjustImgPlacement(Element img, double[] crop) {
-          double w = new Double(img.getAttribute("width"));
-          double h = new Double(img.getAttribute("height"));
-          double nx = new Double(img.getAttribute("x")) + crop[2] * w;
-          double ny = new Double(img.getAttribute("y")) + crop[0] * h;
+          double w = Double.valueOf(img.getAttribute("width"));
+          double h = Double.valueOf(img.getAttribute("height"));
+          double nx = 0;
+          double ny = 0;
+          try {
+              nx = Double.valueOf(img.getAttribute("x"));
+          } catch(java.lang.NumberFormatException e) {
+              // Presume this is the case where the location is not set, so we should leave it as 0.
+              System.err.println("No x coordinate set, default to 0.");
+          }
+          try {
+              ny = Double.valueOf(img.getAttribute("y"));
+          } catch(java.lang.NumberFormatException e) {
+              // Presume this is the case where the location is not set, so we should leave it as 0.
+              System.err.println("No y coordinate set, default to 0.");
+          }
+          nx = nx + crop[2] * w;
+          ny = ny + crop[0] * h;
           double nw = w * (1 - crop[2] - crop[3]);
           double nh = h * (1 - crop[0] - crop[1]);
           img.setAttribute("x", String.valueOf(nx));
