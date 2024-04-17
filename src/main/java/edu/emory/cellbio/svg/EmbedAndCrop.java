@@ -309,9 +309,16 @@ public class EmbedAndCrop
                throw new EmbedAndCropException("Can't read file link: " + path);
           BufferedImage origImg;
           try{
-            origImg = ImageIO.read(imf);
+              /* Using ImageJ to read the image file seems to make things much easier,
+              as it produces TYPE_INT_RGB or rarely TYPE_BYTE_INDEXED BufferedImages,
+              which seem to work reliably with downstream processing.
+              ImageIO produces TYPE_3BYTE_BGR images, which cause problems
+              with AffineTransofrm (might be related to the interpolation), or
+              TYPE_4BYTE_ABGR, which also causes problems with the Jpg writer. 
+              There probably is a way to make this work, but sticking with ImageJ is far easier for now.*/
+            origImg = null; //ImageIO.read(imf); 
             if(origImg == null) {
-                System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
+                //System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
                 origImg = IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
             }
           }
