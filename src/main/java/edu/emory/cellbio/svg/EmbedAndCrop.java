@@ -4,6 +4,7 @@ import ij.IJ;
 
 import java.awt.geom.AffineTransform;
 import java.awt.image.AffineTransformOp;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
@@ -33,6 +34,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
+import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Base64OutputStream;
 
 /**
@@ -291,40 +293,45 @@ public class EmbedAndCrop
           String path = img.getAttribute("xlink:href");
           if(path == null || path.equals(""))
                throw new EmbedAndCropException("No image file listed!");
-          if(path.startsWith("data:image")) {
-              return; // Skip already embeded images
-          }
-          if(path.startsWith("file:///")) {
-               if(System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).indexOf("win") > 0)
-                   path = path.substring(8);
-               else
-                   path = path.substring(7);
-          }
-          path = path.replace("%20", " ");
-          path = path.replace("%5C", "\\");
-          File imf = new File(path);
-          if(!imf.isAbsolute())
-              imf = new File(basePath, path);
-          if(!imf.canRead())
-               throw new EmbedAndCropException("Can't read file link: " + path);
           BufferedImage origImg;
-          try{
-              /* Using ImageJ to read the image file seems to make things much easier,
-              as it produces TYPE_INT_RGB or rarely TYPE_BYTE_INDEXED BufferedImages,
-              which seem to work reliably with downstream processing.
-              ImageIO produces TYPE_3BYTE_BGR images, which cause problems
-              with AffineTransofrm (might be related to the interpolation), or
-              TYPE_4BYTE_ABGR, which also causes problems with the Jpg writer. 
-              There probably is a way to make this work, but sticking with ImageJ is far easier for now.*/
-            origImg = null; //ImageIO.read(imf); 
-            if(origImg == null) {
-                //System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
-                origImg = IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
+          if(path.startsWith("data:image")) {
+              try {
+                  origImg = readEmbeddedImageData(path);
+              } catch(EmbedAndCropException e) {
+                  System.err.println("Warning: An embedded image was detected, but could not be processed. It will be included as-is.\n" + e);
+                  return;
+              }
+          } else {
+            if(path.startsWith("file:///")) {
+                 if(System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).indexOf("win") > 0)
+                     path = path.substring(8);
+                 else
+                     path = path.substring(7);
             }
+            path = path.replace("%20", " ");
+            path = path.replace("%5C", "\\");
+            File imf = new File(path);
+            if(!imf.isAbsolute())
+                imf = new File(basePath, path);
+            if(!imf.canRead())
+                 throw new EmbedAndCropException("Can't read file link: " + path);         
+            try{
+                /* Using ImageJ to read the image file seems to make things much easier,
+                as it produces TYPE_INT_RGB or rarely TYPE_BYTE_INDEXED BufferedImages,
+                which seem to work reliably with downstream processing.
+                ImageIO produces TYPE_3BYTE_BGR images, which cause problems
+                with AffineTransofrm (might be related to the interpolation), or
+                TYPE_4BYTE_ABGR, which also causes problems with the Jpg writer. 
+                There probably is a way to make this work, but sticking with ImageJ is far easier for now.*/
+              origImg = null; //ImageIO.read(imf); 
+              if(origImg == null) {
+                  //System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
+                  origImg = IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
+              }
+            }
+            catch(Throwable t) { throw new EmbedAndCropException("Problem reading image file; " + t); }
           }
-          catch(Throwable t) { throw new EmbedAndCropException("Problem reading image file; " + t); }
-          if(origImg == null)
-               throw new EmbedAndCropException("Couldn't load appropriate plugin for image");
+          
           int w = origImg.getWidth();
           int h = origImg.getHeight();
           int[] icrop = { (int)Math.floor(crop[0]*h), (int)Math.floor(crop[1]*h),
@@ -364,6 +371,45 @@ public class EmbedAndCrop
           
           String result = "data:image/" + imgFileType + ";base64," + baos.toString();
           img.setAttribute("xlink:href", result);
+     }
+     
+     /**
+      * Read a BufferedImage from image data embedded in the SVG file
+      * @param imgString
+      * @return
+      * @throws EmbedAndCropException 
+      */
+     private BufferedImage readEmbeddedImageData(String imgString) throws EmbedAndCropException {
+         BufferedImage img = null;
+         if (imgString.startsWith("data:image/png;")) {
+             imgString = imgString.substring(15);
+             if (!imgString.startsWith("base64,")) {
+                 throw new EmbedAndCropException("Unable to decode image: " + imgString.substring(0, 25));
+             }
+             imgString = imgString.substring(7);
+             ByteArrayInputStream bais = new ByteArrayInputStream(Base64.decodeBase64(imgString));
+             try {
+                img = ImageIO.read(bais);
+             } catch(Throwable t) {
+                 throw new EmbedAndCropException(t.toString());
+             }
+         } else {
+             throw new EmbedAndCropException("Unsupported image format: " + imgString.substring(0, 25));
+         }
+         return convertToRGB(img);
+     }
+     
+     /**
+      * Quick and dirty conversion to TYPE_INT_RGB
+      * @param img
+      * @return 
+      */
+     private BufferedImage convertToRGB(BufferedImage img) {
+         if(img.getType() == BufferedImage.TYPE_INT_RGB)
+             return img;
+         BufferedImage out = new BufferedImage(img.getWidth(), img.getHeight(), BufferedImage.TYPE_INT_RGB);
+         out.createGraphics().drawImage(img, 0, 0, null);
+         return out;
      }
      
      /**
