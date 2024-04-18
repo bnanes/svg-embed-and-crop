@@ -12,7 +12,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 
 import java.awt.image.BufferedImage;
+import java.util.AbstractMap;
 import java.util.Locale;
+import java.util.Map;
 import javax.imageio.IIOImage;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriteParam;
@@ -68,6 +70,7 @@ public class EmbedAndCrop
      private float compQual = 0.8f;
      private boolean doResampling = false;
      private double maxRes = 11.811; // px/mm (default is ~300dpi)
+     private long embeddedImageSizeMin = -1; // Min. size of embedded image to process (bytes), or -1 to skip all.
      
      // -- Methods --
      
@@ -79,6 +82,7 @@ public class EmbedAndCrop
       *          [-o &lt;<em>output</em>&gt; | -s] 
       *          [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]]
       *          [-r [&lt;<em>resolution</em>&gt;]]
+      *          [-e &lt;<em>size</em>&gt;]
       *   </code>
       *   <ul>
       *   <li>  <code>&lt;<em>input</em>&gt; </code>
@@ -108,6 +112,10 @@ public class EmbedAndCrop
       *         If this flag is not given, no resampling will be done.
       *         If this flag is given, but no resolution is provided,
       *         the default value is <code>11.811</code>, approximately equal to 300dpi.
+      *   <li>  <code>-e &lt;<em>size</em>&gt; </code>
+      *         Minimum size at which already embedded images will be
+      *         processed. Set to -1 to skip processing of all embedded
+      *         images (default behavior). Format using common units (20KB, 1MB, etc.)
       *   </ul>
       *   Examples:
       *   <br> <code> input.svg -s -t jpeg -q 0.95 </code>
@@ -188,6 +196,10 @@ public class EmbedAndCrop
                              if(next != null)
                                 maxRes = Double.parseDouble(next);
                              doResampling = true;
+                             i++;
+                         }
+                         else if(token.equals("-e") && next != null) {
+                             embeddedImageSizeMin = processFileSize(next);
                              i++;
                          }
                          else if(i == 0)
@@ -281,57 +293,92 @@ public class EmbedAndCrop
           double[] cf = {0,0,0,0};
           if(clip != null)
                cf = getCropFraction(img, clip);
-          putImgData(img, cf, basePath);
+          BufferedImage I = loadImageData(img, basePath, embeddedImageSizeMin);
+          if(I == null) // Skip further processing if no data loaded
+              return;
+          putImgData(img, I, cf);
      }
      
      /**
-      * Load image data to embed
-      * @param img Image element
-      * @param crop Fraction of image to crop from each edge, {@code {top, bottom, left, right}}
+      * Load image data from an SVG image element
+      * @param imgElement
+      * @param basePath
+      * @param embedSizeMin Do not process (i.e. return null) embedded images below this size (bytes).
+      * Set to -1 to skip all embedded images.
+      * @return Returns the image data in a BufferedImage, or null if an
+      * embedded image cannot be loaded and the element should be skipped.
+      * @throws EmbedAndCropException Image data cannot be loaded and simply
+      * skipping the element is not appropriate (i.e. broken link).
       */
-     private void putImgData(Element img, double[] crop, String basePath) throws EmbedAndCropException {
-          String path = img.getAttribute("xlink:href");
-          if(path == null || path.equals(""))
-               throw new EmbedAndCropException("No image file listed!");
-          BufferedImage origImg;
-          if(path.startsWith("data:image")) {
-              try {
-                  origImg = readEmbeddedImageData(path);
-              } catch(EmbedAndCropException e) {
-                  System.err.println("Warning: An embedded image was detected, but could not be processed. It will be included as-is.\n" + e);
-                  return;
-              }
-          } else {
-            if(path.startsWith("file:///")) {
-                 if(System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).indexOf("win") > 0)
-                     path = path.substring(8);
-                 else
-                     path = path.substring(7);
-            }
-            path = path.replace("%20", " ");
-            path = path.replace("%5C", "\\");
-            File imf = new File(path);
-            if(!imf.isAbsolute())
-                imf = new File(basePath, path);
-            if(!imf.canRead())
-                 throw new EmbedAndCropException("Can't read file link: " + path);         
-            try{
-                /* Using ImageJ to read the image file seems to make things much easier,
+     private BufferedImage loadImageData(Element imgElement, String basePath, long embedSizeMin) throws EmbedAndCropException {
+         String path = imgElement.getAttribute("xlink:href");
+         if (path == null || path.equals("")) {
+             throw new EmbedAndCropException("No image file or data!");
+         }
+         BufferedImage origImg;
+         if (path.startsWith("data:image")) {
+             if(embedSizeMin < 0) {
+                 System.err.println("Skipping embedded image.");
+                 return null;
+             }
+             try {
+                 Map.Entry<BufferedImage, Integer> embeddedImageData = readEmbeddedImageData(path);
+                 BufferedImage img = embeddedImageData.getKey();
+                 Integer imgSize = embeddedImageData.getValue();
+                 if(imgSize <= embedSizeMin) {
+                     System.err.println("Embedded image is below the size limit and will be left as-is.");
+                     return null;
+                 }
+                 return img;
+             } catch(EmbedAndCropException e) {
+                 System.err.println(e.getMessage());
+                 System.err.println("Embedded image will be left as-is.");
+                 return null;
+             }
+         }
+         if (path.startsWith("file:///")) {
+             if (System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH).indexOf("win") > 0) {
+                 path = path.substring(8);
+             } else {
+                 path = path.substring(7);
+             }
+         }
+         path = path.replace("%20", " ");
+         path = path.replace("%5C", "\\");
+         File imf = new File(path);
+         if (!imf.isAbsolute()) {
+             imf = new File(basePath, path);
+         }
+         if (!imf.canRead()) {
+             throw new EmbedAndCropException("Can't read file link: " + path);
+         }
+         try {
+             /* Using ImageJ to read the image file seems to make things much easier,
                 as it produces TYPE_INT_RGB or rarely TYPE_BYTE_INDEXED BufferedImages,
                 which seem to work reliably with downstream processing.
                 ImageIO produces TYPE_3BYTE_BGR images, which cause problems
                 with AffineTransofrm (might be related to the interpolation), or
                 TYPE_4BYTE_ABGR, which also causes problems with the Jpg writer. 
                 There probably is a way to make this work, but sticking with ImageJ is far easier for now.*/
-              origImg = null; //ImageIO.read(imf); 
-              if(origImg == null) {
-                  //System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
-                  origImg = IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
-              }
-            }
-            catch(Throwable t) { throw new EmbedAndCropException("Problem reading image file; " + t); }
-          }
-          
+             origImg = null; //ImageIO.read(imf); 
+             if (origImg == null) {
+                 //System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
+                 return IJ.openImage(imf.getAbsolutePath()).getBufferedImage();
+             }
+         } catch (Throwable t) {
+             throw new EmbedAndCropException("Problem reading image file; " + t);
+         }
+         return null;
+     }
+     
+     /**
+      * Load image data to embed
+      * @param img Image element
+      * @param origImg Image data as a BufferedImage
+      * @param crop Fraction of image to crop from each edge, {@code {top, bottom, left, right}}
+      */
+     private void putImgData(Element img, BufferedImage origImg, double[] crop) throws EmbedAndCropException {
+
           int w = origImg.getWidth();
           int h = origImg.getHeight();
           int[] icrop = { (int)Math.floor(crop[0]*h), (int)Math.floor(crop[1]*h),
@@ -381,18 +428,21 @@ public class EmbedAndCrop
      /**
       * Read a BufferedImage from image data embedded in the SVG file
       * @param imgString
-      * @return
+      * @return 
       * @throws EmbedAndCropException 
       */
-     private BufferedImage readEmbeddedImageData(String imgString) throws EmbedAndCropException {
+     private Map.Entry<BufferedImage, Integer> readEmbeddedImageData(String imgString) throws EmbedAndCropException {
          BufferedImage img = null;
+         Integer imgSize = null;
          if (imgString.startsWith("data:image/png;")) {
              imgString = imgString.substring(15);
              if (!imgString.startsWith("base64,")) {
                  throw new EmbedAndCropException("Unable to decode image: " + imgString.substring(0, 25));
              }
              imgString = imgString.substring(7);
-             ByteArrayInputStream bais = new ByteArrayInputStream(Base64.decodeBase64(imgString));
+             byte[] imgBytes = Base64.decodeBase64(imgString);
+             imgSize = imgBytes.length;
+             ByteArrayInputStream bais = new ByteArrayInputStream(imgBytes);
              try {
                 img = ImageIO.read(bais);
              } catch(Throwable t) {
@@ -401,7 +451,7 @@ public class EmbedAndCrop
          } else {
              throw new EmbedAndCropException("Unsupported image format: " + imgString.substring(0, 25));
          }
-         return convertToRGB(img);
+         return new AbstractMap.SimpleEntry(convertToRGB(img), imgSize);
      }
      
      /**
@@ -879,6 +929,35 @@ public class EmbedAndCrop
           } catch(Throwable t)
           { throw new EmbedAndCropException("Can't read file: " + t.getMessage()); }
           return svg;
+     }
+     
+     /**
+      * Turn a file size string into the number of bytes
+      * @param s
+      * @return 
+      */
+     private long processFileSize(String s) {
+         Double value = Double.valueOf(s.replaceAll("\\D", "").trim());
+         String unit = s.replaceAll("\\d", "").trim();
+         long multiplier;
+         switch (unit) {
+             case "B":
+                 multiplier = 1;
+                 break;
+             case "KB":
+                 multiplier = 1024;
+                 break;
+             case "MB":
+                 multiplier = 1024 * 1024;
+                 break;
+             case "GB":
+                 multiplier = 1024 * 1024 * 1024;
+                 break;
+             // Add more cases for other units if needed
+             default:
+                 throw new IllegalArgumentException("Invalid file size unit: " + unit);
+         }
+         return value.longValue() * multiplier;
      }
      
      // -- Tests --
