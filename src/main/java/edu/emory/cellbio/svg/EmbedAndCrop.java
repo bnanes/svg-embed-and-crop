@@ -346,7 +346,12 @@ public class EmbedAndCrop
           adjustImgPlacement(img, acrop);
           if(doResampling) {
                 double croppedWidth = Double.parseDouble(img.getAttribute("width"));
-                cropImg = limitResolution(cropImg, croppedWidth, maxRes);
+                double croppedHeight = Double.parseDouble(img.getAttribute("height"));
+                double[] transDims = transformToDocumentSpace(new double[] {croppedWidth, croppedHeight}, img);  // Figure out image size in document space
+                double[] transOri = transformToDocumentSpace(new double[] {0,0}, img);
+                for(int i=0; i<2; i++)
+                    transDims[i] = Math.abs(transDims[i] - transOri[i]);
+                cropImg = limitResolution(cropImg, transDims, maxRes);
           }
           ByteArrayOutputStream baos = new ByteArrayOutputStream();
           Base64OutputStream out64 = new Base64OutputStream(baos);
@@ -451,17 +456,20 @@ public class EmbedAndCrop
       * Down-sample an image if above a maximum resolution
       * 
       * @param I Source image
-      * @param w Image width (physical units)
+      * @param wh Image dimensions, width x height (physical units)
       * @param r Limiting resolution (pixels per physical unit)
       * @return A resampled image with the lowest possible resolution 
       *     not less than r, or the source image unchanged if the
       *     source image resolution is less than or equal to r.
       */
-     private BufferedImage limitResolution(BufferedImage I, double w, double r) {
-         if(I.getWidth() / w > r) {
-             double s = Math.ceil(r * w) / I.getWidth();
+     private BufferedImage limitResolution(BufferedImage I, double[] wh, double r) {
+         double rW = I.getWidth() / wh[0];
+         double rH = I.getHeight() / wh[1];
+         double sW = Math.min(r / rW, 1);
+         double sH = Math.min(r / rH, 1);
+         if(sW < 1 | sH < 1) { // Does not assume isotropic resolution
              AffineTransformOp ato = new AffineTransformOp(
-                     AffineTransform.getScaleInstance(s, s), AffineTransformOp.TYPE_BICUBIC);
+                     AffineTransform.getScaleInstance(sW, sH), AffineTransformOp.TYPE_BICUBIC);
              BufferedImage J = ato.createCompatibleDestImage(I, I.getColorModel());
              ato.filter(I, J);
              return J;
