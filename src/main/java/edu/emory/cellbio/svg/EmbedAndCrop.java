@@ -312,9 +312,10 @@ public class EmbedAndCrop
       */
      private BufferedImage loadImageData(Element imgElement, String basePath, long embedSizeMin) throws EmbedAndCropException {
          String path = imgElement.getAttribute("xlink:href");
-         if (path == null || path.equals("")) {
+         if (path == null || path.equals(""))
+             path = imgElement.getAttribute("href"); // xlink:href is now depricated in the SVG standard
+         if (path == null || path.equals(""))
              throw new EmbedAndCropException("No image file or data!");
-         }
          BufferedImage origImg;
          if (path.startsWith("data:image")) {
              if(embedSizeMin < 0) {
@@ -426,7 +427,9 @@ public class EmbedAndCrop
      }
      
      /**
-      * Read a BufferedImage from image data embedded in the SVG file
+      * Read a BufferedImage from image data embedded in the SVG file.
+      * Following the SVG standard, PNG and Jpeg images are supported.
+      * Requires base64 encoding. Transparency is not supported.
       * @param imgString
       * @return 
       * @throws EmbedAndCropException 
@@ -434,8 +437,8 @@ public class EmbedAndCrop
      private Map.Entry<BufferedImage, Integer> readEmbeddedImageData(String imgString) throws EmbedAndCropException {
          BufferedImage img = null;
          Integer imgSize = null;
-         if (imgString.startsWith("data:image/png;")) {
-             imgString = imgString.substring(15);
+         if (imgString.startsWith("data:image/png;") || imgString.startsWith("data:image/jpeg;")) {
+             imgString = imgString.replaceFirst("data:image/((png)|(jpeg));", "");
              if (!imgString.startsWith("base64,")) {
                  throw new EmbedAndCropException("Unable to decode image: " + imgString.substring(0, 25));
              }
