@@ -189,6 +189,7 @@ public class EmbedAndCrop
                               saveAs = true;
                          else if(token.equals("-t") && next != null) {
                               imgFileType = next;
+                              checkImageOutputType();
                               typeLoaded = true;
                               i++;
                          }
@@ -278,6 +279,18 @@ public class EmbedAndCrop
           doResampling = opd.getDoResample();
           maxRes = opd.getMaxRes();
           targetRes = opd.getTargetRes();
+          checkImageOutputType();
+     }
+     
+     /** Validate the image output type */
+     private void checkImageOutputType() throws EmbedAndCropException {
+         switch(imgFileType) {
+             case "png":
+             case "jpeg":
+             case "mix":
+                 return;
+         }
+         throw new EmbedAndCropException("Unsupported output type: " + imgFileType);
      }
      
      /** Save an XML(SVG) file */
@@ -419,28 +432,52 @@ public class EmbedAndCrop
                     transDims[i] = Math.abs(transDims[i] - transOri[i]);
                 cropImg = limitResolution(cropImg, transDims, targetRes, maxRes);
           }
-          ByteArrayOutputStream baos = new ByteArrayOutputStream();
-          Base64OutputStream out64 = new Base64OutputStream(baos);
+          ByteArrayOutputStream baos = null;
+          String mime = null;
           try{
-               Iterator<ImageWriter> iws = ImageIO.getImageWritersByFormatName(imgFileType);
-               if(!iws.hasNext())
-                    throw new EmbedAndCropException
-                         ("Can't find image writer for " + imgFileType);
-               ImageWriter iw = iws.next();
-               ImageWriteParam iwp = iw.getDefaultWriteParam();
-               if(iwp.canWriteCompressed()) {
-                    iwp.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
-                    iwp.setCompressionQuality(compQual);
+               ByteArrayOutputStream bytesPng = new ByteArrayOutputStream();
+               ByteArrayOutputStream bytesJpg = new ByteArrayOutputStream();
+               if(imgFileType.equals("jpeg") || imgFileType.equals("mix")) {
+                   ImageWriter iwJpg = ImageIO.getImageWritersByFormatName("jpeg").next();
+                   ImageWriteParam iwpJpg = iwJpg.getDefaultWriteParam();
+                   iwpJpg.setCompressionMode(ImageWriteParam.MODE_EXPLICIT);
+                   iwpJpg.setCompressionQuality(compQual);
+                   ImageOutputStream iosJpg = ImageIO.createImageOutputStream(bytesJpg);
+                   iwJpg.setOutput(iosJpg);
+                   iwJpg.write(null, new IIOImage(cropImg, null, null), iwpJpg);
+                   iosJpg.close();
+                   mime = "jpeg";
+                   baos = bytesJpg;
                }
-               ImageOutputStream ios = ImageIO.createImageOutputStream(out64);
-               iw.setOutput(ios);
-               iw.write(null, new IIOImage(cropImg, null, null), iwp);
-               ios.close();
-               out64.close();
+               if(imgFileType.equals("png") || imgFileType.equals("mix")) {
+                   ImageWriter iwPng = ImageIO.getImageWritersByFormatName("png").next();
+                   ImageWriteParam iwpPng = iwPng.getDefaultWriteParam();
+                   ImageOutputStream iosPng = ImageIO.createImageOutputStream(bytesPng);
+                   iwPng.setOutput(iosPng);
+                   iwPng.write(null, new IIOImage(cropImg, null, null), iwpPng);
+                   iosPng.close();
+                   mime = "png";
+                   baos = bytesPng;
+               }
+               if(imgFileType.equals("mix")) {
+                   int sizePng = bytesPng.size();
+                   int sizeJpg = bytesJpg.size();
+                   if(sizeJpg < sizePng) {
+                       System.err.println("Embedding image as Jpeg.");
+                       mime = "jpeg";
+                       baos = bytesJpg;
+                   } else {
+                       System.err.println("Embedding image as PNG.");
+                       mime = "png";
+                       baos = bytesPng;
+                   }
+               }
           }
           catch(Throwable t) { throw new EmbedAndCropException("Problem writing/encoding image data; " + t); }
+          if(baos == null)
+              throw new EmbedAndCropException("Unable to determine image type: " + imgFileType);
           
-          String result = "data:image/" + imgFileType + ";base64," + baos.toString();
+          String result = "data:image/" + mime + ";base64," + Base64.encodeBase64String(baos.toByteArray());
           img.setAttribute("xlink:href", result);
      }
      

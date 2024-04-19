@@ -49,8 +49,8 @@ public class OutputParamDialog extends JDialog implements ActionListener {
      @Override
      public synchronized void actionPerformed(ActionEvent e) {
           if(e.getSource() == imgFileMode) {
-               compQual.setEnabled(imgFileMode.getSelectedIndex() == 1);
-               compQualLabel.setEnabled(imgFileMode.getSelectedIndex() == 1);
+               compQual.setEnabled(imgFileMode.getSelectedIndex() > 0);
+               compQualLabel.setEnabled(imgFileMode.getSelectedIndex() > 0);
           }
           if(e.getSource() == ok) {
                System.err.println("ok");
@@ -88,6 +88,8 @@ public class OutputParamDialog extends JDialog implements ActionListener {
                     return "png";
                case 1:
                     return "jpeg";
+               case 2:
+                    return "mix";
           }
           throw new IllegalArgumentException("Invalid image type selecetd");
      }
@@ -126,14 +128,14 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           
           setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
           imgFileLabel = new JLabel("Image encoding type:");
-          imgFileMode = new JComboBox(new String[] {"PNG", "JPEG"});
+          imgFileMode = new JComboBox(new String[] {"PNG", "JPEG", "Most efficient"});
           imgFileMode.setAlignmentX(Component.LEFT_ALIGNMENT);
           imgFileMode.addActionListener(this);
           compQualLabel = new JLabel("Compression level\n(high, better quality; low, smaller file):");
           compQualLabel.setEnabled(imgFileMode.getSelectedIndex() == 1);
           compQual = new JSpinner(new SpinnerNumberModel(0.8f, 0.0f, 1.0f, 0.1f));
           compQual.setAlignmentX(Component.LEFT_ALIGNMENT);
-          compQual.setEnabled(imgFileMode.getSelectedIndex() == 1);
+          compQual.setEnabled(imgFileMode.getSelectedIndex() > 0);
           resampLabel = new JLabel("Downsample to (px/mm):");
           resampLabel2 = new JLabel("For images greater than (px/mm):");
           resampCheck = new JCheckBox("Do resampling?");
