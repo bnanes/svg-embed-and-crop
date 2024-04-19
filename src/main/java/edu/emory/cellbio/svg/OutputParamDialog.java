@@ -29,8 +29,10 @@ public class OutputParamDialog extends JDialog implements ActionListener {
      private JLabel compQualLabel;
      private JSpinner compQual;
      private JLabel resampLabel;
+     private JLabel resampLabel2;
      private JCheckBox resampCheck;
      private JSpinner resampLevel;
+     private JSpinner resampLevel2;
      private JButton ok;
      private JButton cancel;
      
@@ -101,8 +103,11 @@ public class OutputParamDialog extends JDialog implements ActionListener {
      }
      
      /** Get the selected resampling level */
-     public float getResampleLevel() {
+     public float getTargetRes() {
          return ((Double)resampLevel.getModel().getValue()).floatValue();
+     }
+     public float getMaxRes() {
+         return ((Double)resampLevel2.getModel().getValue()).floatValue();
      }
      
      // -- Helper methods --
@@ -129,10 +134,13 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           compQual = new JSpinner(new SpinnerNumberModel(0.8f, 0.0f, 1.0f, 0.1f));
           compQual.setAlignmentX(Component.LEFT_ALIGNMENT);
           compQual.setEnabled(imgFileMode.getSelectedIndex() == 1);
-          resampLabel = new JLabel("Max resolution (px/mm):");
+          resampLabel = new JLabel("Downsample to (px/mm):");
+          resampLabel2 = new JLabel("For images greater than (px/mm):");
           resampCheck = new JCheckBox("Do resampling?");
           resampLevel = new JSpinner(new SpinnerNumberModel(11.811f, 0.0f, 1000.0f, 0.1f));
           resampLevel.setAlignmentX(Component.LEFT_ALIGNMENT);
+          resampLevel2 = new JSpinner(new SpinnerNumberModel(15.748f, 0.0f, 1000.0f, 0.1f));
+          resampLevel2.setAlignmentX(Component.LEFT_ALIGNMENT);
           JPanel buttons = new JPanel();
           buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
           buttons.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -157,6 +165,8 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           add(resampCheck);
           add(resampLabel);
           add(resampLevel);
+          add(resampLabel2);
+          add(resampLevel2);
           add(Box.createVerticalStrut(10));
           add(buttons);
           add(Box.createVerticalStrut(5));

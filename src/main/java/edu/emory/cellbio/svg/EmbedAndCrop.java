@@ -276,7 +276,8 @@ public class EmbedAndCrop
           imgFileType = opd.getImgFileMode();
           compQual = opd.getCompressionQuality();
           doResampling = opd.getDoResample();
-          maxRes = opd.getResampleLevel();
+          maxRes = opd.getMaxRes();
+          targetRes = opd.getTargetRes();
      }
      
      /** Save an XML(SVG) file */
