@@ -69,7 +69,8 @@ public class EmbedAndCrop
      private String imgFileType = "png";
      private float compQual = 0.8f;
      private boolean doResampling = false;
-     private double maxRes = 11.811; // px/mm (default is ~300dpi)
+     private double targetRes = 11.811; // px/mm (default is ~300dpi)
+     private double maxRes = 15.748; // px/mm (default is ~400dpi)
      private long embeddedImageSizeMin = -1; // Min. size of embedded image to process (bytes), or -1 to skip all.
      
      private final boolean VERBOSE = false;
@@ -83,7 +84,7 @@ public class EmbedAndCrop
       *   <code> [&lt;<em>input</em>&gt;] 
       *          [-o &lt;<em>output</em>&gt; | -s] 
       *          [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]]
-      *          [-r [&lt;<em>resolution</em>&gt;]]
+      *          [-r [&lt;<em>target res.</em>&gt; [&lt;<em>max res.</em>&gt;]]]
       *          [-e &lt;<em>size</em>&gt;]
       *   </code>
       *   <ul>
@@ -108,12 +109,15 @@ public class EmbedAndCrop
       *   <li>  <code>-q &lt;<em>quality</em>&gt; </code>
       *         Quality parameter for jpeg compression.
       *         Default value is <code>0.85</code>.
-      *   <li>  <code>-r &lt;<em>resolution</em>&gt; </code>
-      *         Maximum image resolution, in pixels per mm.
-      *         Higher resolution images will be downsampled.
-      *         If this flag is not given, no resampling will be done.
-      *         If this flag is given, but no resolution is provided,
+      *   <li>  <code>-r &lt;<em>target res.</em>&gt; &lt;<em>max res.</em>&gt;</code>
+      *         Images with resolution above <code>&lt;<em>max res.</em>&gt;</code>
+      *         should be downsampled to <code>&lt;<em>target res.</em>&gt;</code>.
+      *         Resolution is specified in pixels per mm.
+      *         If this flag is not set, no resampling will be done.
+      *         If this flag is set, but no target resolution is provided,
       *         the default value is <code>11.811</code>, approximately equal to 300dpi.
+      *         If only the target resolution is provided, the max resolution
+      *         defaults to 4/3 of the target resolution.
       *   <li>  <code>-e &lt;<em>size</em>&gt; </code>
       *         Minimum size at which already embedded images will be
       *         processed. Set to -1 to skip processing of all embedded
@@ -174,6 +178,7 @@ public class EmbedAndCrop
                     for(int i=0; i<args.length; i++) {
                          final String token = args[i].trim();
                          final String next = args.length > i+1 ? args[i+1] : null;
+                         final String next2 = args.length > i+2 ? args[i+2] : null;
                          if(token == null || token.isEmpty())
                               continue;
                          if(token.equals("-o") && next != null) {
@@ -195,10 +200,17 @@ public class EmbedAndCrop
                               i++;
                          } 
                          else if(token.equals("-r")) {
-                             if(next != null)
-                                maxRes = Double.parseDouble(next);
+                             if(next != null) {
+                                targetRes = Double.parseDouble(next);
+                                i++;
+                                if(next2 != null && !next2.startsWith("-")) {
+                                    maxRes = Double.parseDouble(next2);
+                                    i++;
+                                } else {
+                                    maxRes = 4/3 * targetRes;
+                                }
+                             }
                              doResampling = true;
-                             i++;
                          }
                          else if(token.equals("-e") && next != null) {
                              embeddedImageSizeMin = processFileSize(next);
@@ -404,7 +416,7 @@ public class EmbedAndCrop
                 double[] transOri = transformToDocumentSpace(new double[] {0,0}, img);
                 for(int i=0; i<2; i++)
                     transDims[i] = Math.abs(transDims[i] - transOri[i]);
-                cropImg = limitResolution(cropImg, transDims, maxRes);
+                cropImg = limitResolution(cropImg, transDims, targetRes, maxRes);
           }
           ByteArrayOutputStream baos = new ByteArrayOutputStream();
           Base64OutputStream out64 = new Base64OutputStream(baos);
@@ -515,17 +527,19 @@ public class EmbedAndCrop
       * 
       * @param I Source image
       * @param wh Image dimensions, width x height (physical units)
-      * @param r Limiting resolution (pixels per physical unit)
+      * @param rTarget Target resolution (pixels per physical unit)
+      * @param rMax Max resolution (pixels per physical unit)
       * @return A resampled image with the lowest possible resolution 
       *     not less than r, or the source image unchanged if the
       *     source image resolution is less than or equal to r.
       */
-     private BufferedImage limitResolution(BufferedImage I, double[] wh, double r) {
+     private BufferedImage limitResolution(BufferedImage I, double[] wh, double rTarget, double rMax) {
          double rW = I.getWidth() / wh[0];
          double rH = I.getHeight() / wh[1];
-         double sW = Math.min(r / rW, 1);
-         double sH = Math.min(r / rH, 1);
-         if(sW < 1 | sH < 1) { // Does not assume isotropic resolution
+         double sW = Math.min(rTarget / rW, 1);
+         double sH = Math.min(rTarget / rH, 1);
+         if(rW > rMax || rH > rMax) { // Does not assume isotropic resolution
+             System.err.printf("Downsampling by factor of %1$.3f x %2$.3f .\n", sW, sH);
              AffineTransformOp ato = new AffineTransformOp(
                      AffineTransform.getScaleInstance(sW, sH), AffineTransformOp.TYPE_BICUBIC);
              BufferedImage J = ato.createCompatibleDestImage(I, I.getColorModel());
