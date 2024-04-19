@@ -72,6 +72,8 @@ public class EmbedAndCrop
      private double maxRes = 11.811; // px/mm (default is ~300dpi)
      private long embeddedImageSizeMin = -1; // Min. size of embedded image to process (bytes), or -1 to skip all.
      
+     private final boolean VERBOSE = false;
+     
      // -- Methods --
      
      /**
@@ -232,6 +234,7 @@ public class EmbedAndCrop
           for(int i=0; i<images.getLength(); i++) {
                Node img = images.item(i);
                if(img.getNodeType() == Node.ELEMENT_NODE) {
+                    System.err.println("## Working on image " + ((Element)img).getAttribute("id"));
                     Element clip = getClipPath((Element)img, dom);
                     if(clip != null) {
                          processImg((Element)img, clip, basePath);
@@ -330,6 +333,7 @@ public class EmbedAndCrop
                      System.err.println("Embedded image is below the size limit and will be left as-is.");
                      return null;
                  }
+                 System.err.println("Embedded image is above the size limit and will be processed.");
                  return img;
              } catch(EmbedAndCropException e) {
                  System.err.println(e.getMessage());
@@ -361,6 +365,7 @@ public class EmbedAndCrop
                 with AffineTransofrm (might be related to the interpolation), or
                 TYPE_4BYTE_ABGR, which also causes problems with the Jpg writer. 
                 There probably is a way to make this work, but sticking with ImageJ is far easier for now.*/
+             System.err.println("Loading image from file " + imf.getName());
              origImg = null; //ImageIO.read(imf); 
              if (origImg == null) {
                  //System.err.println("Unable to open " + imf.getName() + " with ImageIO, falling back to ImageJ.");
@@ -539,7 +544,8 @@ public class EmbedAndCrop
       */
      private double[] getCropFraction(Element img, Element clip) throws EmbedAndCropException {
           double[] imgBounds = getRectBounds(img);
-          System.err.println("Image bounds: (" + imgBounds[0] + "," + imgBounds[2] + "); (" + imgBounds[1] + "," + imgBounds[3] + ")");
+          if(VERBOSE)
+            System.err.println("Image bounds: (" + imgBounds[0] + "," + imgBounds[2] + "); (" + imgBounds[1] + "," + imgBounds[3] + ")");
           double[][] clipPoints = getClipPoints(clip);
           double[] cf = {1,1,1,1};
           if(clipPoints == null || clipPoints.length == 0)
@@ -551,7 +557,8 @@ public class EmbedAndCrop
                for(int j=0; j<4; j++)
                          cf[j] = Math.min(cf[j], pf[j]);
           }
-          System.err.println("Top clip, " + cf[0] + "; Bottom clip, " + cf[1] + "; Left clip, " + cf[2] + "; Right clip, " + cf[3]);
+          if(VERBOSE)
+            System.err.println("Top clip, " + cf[0] + "; Bottom clip, " + cf[1] + "; Left clip, " + cf[2] + "; Right clip, " + cf[3]);
           return cf;
      }
      
@@ -612,10 +619,12 @@ public class EmbedAndCrop
           double[] lpd = { lp1[0] - lp0[0], lp1[1] - lp0[1] };
           double tMin = ( x[0]*lpd[0] + x[1]*lpd[1] - lp0[0]*lpd[0] - lp0[1]*lpd[1])
                / (Math.pow(lpd[0], 2) + Math.pow(lpd[1], 2));
-          System.err.println("Min t: " + tMin);
+          if(VERBOSE)
+            System.err.println("Min t: " + tMin);
           double d2 = Math.pow(lp0[0] + tMin*(lp1[0] - lp0[0]) - x[0], 2)
                + Math.pow(lp0[1] + tMin*(lp1[1] - lp0[1]) - x[1], 2);
-          System.err.println("r^2 = " + d2);
+          if(VERBOSE)
+            System.err.println("r^2 = " + d2);
           return Math.sqrt(d2);
      }
      
@@ -734,7 +743,8 @@ public class EmbedAndCrop
       * @return {@code {x,y}}
       */
      private double[] parseTransform(double[] point, String transform) {
-          System.err.println("Transforming (" + point[0] + "," + point[1] + ") using attribute: " + transform);
+          if(VERBOSE)
+            System.err.println("Transforming (" + point[0] + "," + point[1] + ") using attribute: " + transform);
           if(transform == null || transform.equals(""))
                return point;
           transform = transform.trim();
@@ -802,7 +812,8 @@ public class EmbedAndCrop
                     point = transformSkewY(point, new Double(t));
                }
           }
-          System.err.println("Result: (" + point[0] + "," + point[1] + ")");
+          if(VERBOSE)
+            System.err.println("Result: (" + point[0] + "," + point[1] + ")");
           return point;
      }
 
@@ -902,7 +913,10 @@ public class EmbedAndCrop
           int b = clip.indexOf(")");
           if(a >= 0 && b >= 0)
                clip = clip.substring(a+1, b);
-          System.err.println("Image " + img.getAttribute("xlink:href") + " has clip-path " + clip);
+          if(VERBOSE)
+              System.err.println("Image " + img.getAttribute("xlink:href") + " has clip-path " + clip);
+          else
+              System.err.println("Image has clip-path " + clip);
           NodeList clips = dom.getElementsByTagName("clipPath");
           Element clipElement = null;
           for(int i=0; i<clips.getLength(); i++)
@@ -941,7 +955,7 @@ public class EmbedAndCrop
       */
      private long processFileSize(String s) {
          Double value = Double.valueOf(s.replaceAll("\\D", "").trim());
-         String unit = s.replaceAll("\\d", "").trim();
+         String unit = s.replaceAll("\\d", "").trim().toUpperCase();
          long multiplier;
          switch (unit) {
              case "B":
