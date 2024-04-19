@@ -9,7 +9,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.OutputStream;
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import java.awt.image.BufferedImage;
 import java.util.AbstractMap;
@@ -37,7 +36,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.codec.binary.Base64OutputStream;
 
 /**
  * Inkscape extension: Embed and Crop Images
@@ -103,8 +101,10 @@ public class EmbedAndCrop
       *         standard output stream
       *   <li>  <code>-t &lt;<em>type</em>&gt; </code>
       *         Specify the type of image for encoding.
-      *         Supported options are <code>png</code> or <code>jpeg</code>.
-      *         If this is not specified, the user will
+      *         Supported options are <code>png</code>, <code>jpeg</code>, 
+      *         or <code>mix</code>. The latter option indicates that for each
+      *         image, the format resulting in the smaller file size should
+      *         be used. If this flag is not set, the user will
       *         be presented with a selection dialog.
       *   <li>  <code>-q &lt;<em>quality</em>&gt; </code>
       *         Quality parameter for jpeg compression.

@@ -82,8 +82,6 @@ be run from the menu:
 Known Issues
 ------------
 
--    Images that have already been embedded are ignored.
-
 -    Only clipping planes created from rectangles are
      currently supported.
 
@@ -112,6 +110,15 @@ Known Issues
 
 Release Notes
 -------------
+
+<h3>Version 1.8</h3>
+
+-    Update to JavaSE 8
+-    Fix bug affecting resolution calculation when down-sampling images
+-    Independently define target and maximum image resolutions
+-    Allow selection of Jpeg or PNG image output depending on file size
+-    Add support for processing embedded images (command line only)
+-    Compatibility fixes for Unix systems
 
 <h3>version 1.7</h3>
 
@@ -155,34 +162,60 @@ Running from the Command Line
 It is possible to run the app directly from
 the command line without running Inkscape:
 
-<pre>java -classpath &lt;<em>install path</em>&gt; edu.emory.cellbio.svg.EmbedAndCrop
-      [&lt;<em>input</em>&gt;] [-o &lt;<em>output</em>&gt; | -s] [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]] [-r [&lt;<em>resolution</em>&gt;]]</pre>
+<pre>
+java -classpath &lt;<em>install path</em>&gt; edu.emory.cellbio.svg.EmbedAndCrop    
+   [&lt;<em>input</em>&gt;] [-o &lt;<em>output</em>&gt; | -s]
+   [-t &lt;<em>type</em>&gt; [-q &lt;<em>quality</em>&gt;]] 
+   [-r [&lt;<em>target res.</em>&gt; [&lt;<em>max res.</em>&gt;]]] 
+   [-e &lt;<em>size</em>&gt;]
+</pre>
 
--    <code>&lt;<em>install path</em>&gt;</code> --
-          Location of the app's jar files, ending with `/*`.  
-          Ex.: `/usr/some-dir/svg-embed-and-crop/*`
--    <code>&lt;<em>input</em>&gt;</code> --
-          Path to the input SVG file. If missing, the user will be presented with
-          a file open dialog box.
--    <code>-o &lt;<em>output</em>&gt;</code> --
-          Path to save the output SVG file with embeded images
--    `-s` -- Present the user with a file save dialog
-          to specify the output file
--    **Note:** If neither `-o` nor `-s` is specified, the output 
-          is sent to the standard output stream
--    <code>-t &lt;<em>type</em>&gt;</code> --
-          Specify the type of image for encoding. Supported options
-          are `png` or `jpeg`. If this is not specified, the user
-          will be presented with a selection dialog.
--    <code>-q &lt;<em>quality</em>&gt;</code> --
-          Quality parameter for jpeg compression.
-          Default value is `0.85`.
--    <code>-r &lt;<em>resolution</em>&gt;</code>
-          Maximum image resolution, in pixels per mm.
-          Higher resolution images will be downsampled.
-          If this flag is not given, no resampling will be done.
-          If this flag is given, but no resolution is provided,
-          the default value is <code>11.811</code>, approximately equal to 300dpi.
+- <code>&lt;<em>install path</em>&gt;</code>    
+Location of the app's jar files, ending with `/*`. 
+Ex.: `/usr/some-dir/svg-embed-and-crop/*`
+
+- <code>&lt;<em>input</em>&gt; </code>    
+Path to the input SVG file.
+If missing, the user will be presented with
+a file open dialog box.
+
+- <code>-o &lt;<em>output</em>&gt; </code>    
+Path to save the output
+SVG file with embedded images
+
+- <code>-s </code>    
+Present the user with a file save dialog
+to specify the output file
+<em>Note:</em> If neither <code>-o</code> nor <code>-s</code>
+is specified, the output is sent to the
+standard output stream
+
+- <code>-t &lt;<em>type</em>&gt; </code>    
+Specify the type of image for encoding.
+Supported options are <code>png</code>, <code>jpeg</code>, 
+or <code>mix</code>. The latter option indicates that for each
+image, the format resulting in the smaller file size should
+be used. If this flag is not set, the user will
+be presented with a selection dialog.
+
+- <code>-q &lt;<em>quality</em>&gt; </code>    
+Quality parameter for jpeg compression.
+Default value is <code>0.85</code>.
+
+- <code>-r &lt;<em>target res.</em>&gt; &lt;<em>max res.</em>&gt;</code>    
+Images with resolution above <code>&lt;<em>max res.</em>&gt;</code>
+should be downsampled to <code>&lt;<em>target res.</em>&gt;</code>.
+Resolution is specified in pixels per mm.
+If this flag is not set, no resampling will be done.
+If this flag is set, but no target resolution is provided,
+the default value is <code>11.811</code>, approximately equal to 300dpi.
+If only the target resolution is provided, the max resolution
+defaults to 4/3 of the target resolution.
+
+- <code>-e &lt;<em>size</em>&gt; </code>    
+Minimum size at which already embedded images will be
+processed. Set to -1 to skip processing of all embedded
+images (default behavior). Format using common units (20KB, 1MB, etc.)
 
 **Examples:**
 
