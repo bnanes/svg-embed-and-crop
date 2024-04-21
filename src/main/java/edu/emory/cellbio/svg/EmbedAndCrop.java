@@ -411,6 +411,10 @@ public class EmbedAndCrop
       */
      private void putImgData(Element img, BufferedImage origImg, double[] crop) throws EmbedAndCropException {
 
+          if(doResampling) {
+              double[] WH = getElementDims(img);
+              origImg = limitResolution(origImg, WH, targetRes, maxRes);
+          }
           int w = origImg.getWidth();
           int h = origImg.getHeight();
           int[] icrop = { (int)Math.floor(crop[0]*h), (int)Math.floor(crop[1]*h),
@@ -423,10 +427,6 @@ public class EmbedAndCrop
           double[] acrop = { ((double)icrop[0])/h, ((double)icrop[1])/h,
                              ((double)icrop[2])/w, ((double)icrop[3])/w };
           adjustImgPlacement(img, acrop);
-          if(doResampling) {
-              double[] WH = getElementDims(img);
-              cropImg = limitResolution(cropImg, WH, targetRes, maxRes);
-          }
           ByteArrayOutputStream baos = null;
           String mime = null;
           try{
