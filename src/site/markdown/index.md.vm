@@ -113,16 +113,15 @@ Release Notes
 
 <h3>Version 1.8</h3>
 
--    Update to JavaSE 8
 -    Fix bug affecting resolution calculation when down-sampling images
+
+<h3>Version 1.7</h3>
+
+-    Update to JavaSE 8
 -    Independently define target and maximum image resolutions
 -    Allow selection of Jpeg or PNG image output depending on file size
 -    Add support for processing embedded images (command line only)
 -    Compatibility fixes for Unix systems
-
-<h3>version 1.7</h3>
-
--    Fix OS-dependent resolution of certain image paths.
 
 <h3>version 1.6</h3>
 
