@@ -424,13 +424,8 @@ public class EmbedAndCrop
                              ((double)icrop[2])/w, ((double)icrop[3])/w };
           adjustImgPlacement(img, acrop);
           if(doResampling) {
-                double croppedWidth = Double.parseDouble(img.getAttribute("width"));
-                double croppedHeight = Double.parseDouble(img.getAttribute("height"));
-                double[] transDims = transformToDocumentSpace(new double[] {croppedWidth, croppedHeight}, img);  // Figure out image size in document space
-                double[] transOri = transformToDocumentSpace(new double[] {0,0}, img);
-                for(int i=0; i<2; i++)
-                    transDims[i] = Math.abs(transDims[i] - transOri[i]);
-                cropImg = limitResolution(cropImg, transDims, targetRes, maxRes);
+              double[] WH = getElementDims(img);
+              cropImg = limitResolution(cropImg, WH, targetRes, maxRes);
           }
           ByteArrayOutputStream baos = null;
           String mime = null;
@@ -560,6 +555,31 @@ public class EmbedAndCrop
           img.setAttribute("height", String.valueOf(nh));
      }
      
+     /**
+      * Transform the width and height attributes of an element to document space.
+      * @param e
+      * @return 
+      */
+     private double[] getElementDims(Element e) {
+         double W = Double.parseDouble(e.getAttribute("width"));
+         double H = Double.parseDouble(e.getAttribute("height"));
+         double[][] points = {
+             {0, 0},
+             {W, 0},
+             {0, H}
+         };
+         points = transformToDocumentSpace(points, e);
+         if(points[1][1]-points[0][1] == 0)
+             W = Math.abs(points[1][0]-points[0][0]);
+         else
+             W = Math.sqrt(Math.pow(points[1][1]-points[0][1], 2) + Math.pow(points[1][0]-points[0][0], 2));
+         if(points[2][0]-points[0][0] == 0)
+             H = Math.abs(points[2][1]-points[0][1]);
+         else
+             H = Math.sqrt(Math.pow(points[2][1]-points[0][1], 2) + Math.pow(points[2][0]-points[0][0], 2));
+         return new double[] {W, H};
+     }
+        
      /**
       * Down-sample an image if above a maximum resolution
       * 
@@ -786,6 +806,31 @@ public class EmbedAndCrop
                if(parent != null)
                     point = transformToDocumentSpace(point, parent);
           return point;
+     }
+     
+     /**
+      * Transform a set of points to document space
+      * @param points Array of points ({@code {x,y}})
+      * @param n
+      * @return 
+      */
+     private double[][] transformToDocumentSpace(double[][] points, Node n) {
+         if (n.getNodeType() == Node.ELEMENT_NODE) {
+             Element e = (Element) n;
+             String transform = e.getAttribute("transform");
+             if (transform != null && !transform.equals("")) {
+                 for (int i = 0; i < points.length; i++) {
+                     double[] point = points[i];
+                     point = parseTransform(point, transform);
+                     points[i] = point;
+                 }
+             }
+         }
+         Node parent = n.getParentNode();
+         if (parent != null) {
+             points = transformToDocumentSpace(points, parent);
+         }
+         return points;
      }
      
      /**
