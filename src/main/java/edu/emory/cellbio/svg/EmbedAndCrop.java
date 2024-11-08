@@ -248,6 +248,17 @@ public class EmbedAndCrop
                Node img = images.item(i);
                if(img.getNodeType() == Node.ELEMENT_NODE) {
                     System.err.println("## Working on image " + ((Element)img).getAttribute("id"));
+                    Element parent = (Element)(img.getParentNode());
+                    if (parent.getTagName().equals("mask")) {
+                        System.err.println("This image appears to BE a mask and will be removed!");
+                        parent.removeChild(img);
+                        continue;
+                    }
+                    String mask = ((Element)img).getAttribute("mask");
+                    if(mask != null && !mask.isBlank()) {
+                        System.err.println("This image has a mask, which will be removed to ensure compatability. (" + mask + ")");
+                        ((Element)img).removeAttribute("mask");
+                    }
                     Element clip = getClipPath((Element)img, dom);
                     if(clip != null) {
                          processImg((Element)img, clip, basePath);
