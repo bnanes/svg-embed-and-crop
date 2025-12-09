@@ -67,8 +67,8 @@ public class OutputParamDialog extends JDialog implements ActionListener {
                notifyAll();
           }
           if(e.getSource() == procEmbedCheck) {
-              procEmbedLabel.setEnabled(procEmbedCheck.isSelected());
-              procEmbedLevel.setEnabled(procEmbedCheck.isSelected());
+              procEmbedLabel.setEnabled(procEmbedCheck.getModel().isSelected());
+              procEmbedLevel.setEnabled(procEmbedCheck.getModel().isSelected());
               notifyAll();
           }
      }
@@ -124,7 +124,7 @@ public class OutputParamDialog extends JDialog implements ActionListener {
      public long getEmbeddedImageSizeMin() {
          if(!procEmbedCheck.getModel().isSelected())
              return -1;
-         return Math.round((Double)procEmbedLevel.getModel().getValue())*1024;
+         return ((Integer)procEmbedLevel.getModel().getValue()).longValue()*1024;
      }
      
      // -- Helper methods --
@@ -159,9 +159,12 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           resampLevel2 = new JSpinner(new SpinnerNumberModel(15.748f, 0.0f, 1000.0f, 0.1f));
           resampLevel2.setAlignmentX(Component.LEFT_ALIGNMENT);
           procEmbedCheck = new JCheckBox("Process embedded images?");
+          procEmbedCheck.addActionListener(this);
           procEmbedLabel = new JLabel("For images greater than (kB):");
+          procEmbedLabel.setEnabled(false);
           procEmbedLevel = new JSpinner(new SpinnerNumberModel(250, 0, 5000, 10));
           procEmbedLevel.setAlignmentX(Component.LEFT_ALIGNMENT);
+          procEmbedLevel.setEnabled(false);
           JPanel buttons = new JPanel();
           buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
           buttons.setAlignmentX(Component.LEFT_ALIGNMENT);
