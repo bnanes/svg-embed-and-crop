@@ -33,6 +33,9 @@ public class OutputParamDialog extends JDialog implements ActionListener {
      private JCheckBox resampCheck;
      private JSpinner resampLevel;
      private JSpinner resampLevel2;
+     private JCheckBox procEmbedCheck;
+     private JLabel procEmbedLabel;
+     private JSpinner procEmbedLevel;
      private JButton ok;
      private JButton cancel;
      
@@ -62,6 +65,11 @@ public class OutputParamDialog extends JDialog implements ActionListener {
                System.err.println("cancel");
                setVisible(false);
                notifyAll();
+          }
+          if(e.getSource() == procEmbedCheck) {
+              procEmbedLabel.setEnabled(procEmbedCheck.isSelected());
+              procEmbedLevel.setEnabled(procEmbedCheck.isSelected());
+              notifyAll();
           }
      }
      
@@ -112,6 +120,13 @@ public class OutputParamDialog extends JDialog implements ActionListener {
          return ((Double)resampLevel2.getModel().getValue()).floatValue();
      }
      
+     /** Get the selected embedded image processing threshold */
+     public long getEmbeddedImageSizeMin() {
+         if(!procEmbedCheck.getModel().isSelected())
+             return -1;
+         return Math.round((Double)procEmbedLevel.getModel().getValue())*1024;
+     }
+     
      // -- Helper methods --
      
      private void setup() {
@@ -143,6 +158,10 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           resampLevel.setAlignmentX(Component.LEFT_ALIGNMENT);
           resampLevel2 = new JSpinner(new SpinnerNumberModel(15.748f, 0.0f, 1000.0f, 0.1f));
           resampLevel2.setAlignmentX(Component.LEFT_ALIGNMENT);
+          procEmbedCheck = new JCheckBox("Process embedded images?");
+          procEmbedLabel = new JLabel("For images greater than (kB):");
+          procEmbedLevel = new JSpinner(new SpinnerNumberModel(250, 0, 5000, 10));
+          procEmbedLevel.setAlignmentX(Component.LEFT_ALIGNMENT);
           JPanel buttons = new JPanel();
           buttons.setLayout(new BoxLayout(buttons, BoxLayout.X_AXIS));
           buttons.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -169,6 +188,10 @@ public class OutputParamDialog extends JDialog implements ActionListener {
           add(resampLevel);
           add(resampLabel2);
           add(resampLevel2);
+          add(Box.createVerticalStrut(10));
+          add(procEmbedCheck);
+          add(procEmbedLabel);
+          add(procEmbedLevel);
           add(Box.createVerticalStrut(10));
           add(buttons);
           add(Box.createVerticalStrut(5));

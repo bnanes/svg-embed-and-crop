@@ -290,6 +290,7 @@ public class EmbedAndCrop
           doResampling = opd.getDoResample();
           maxRes = opd.getMaxRes();
           targetRes = opd.getTargetRes();
+          embeddedImageSizeMin = opd.getEmbeddedImageSizeMin();
           checkImageOutputType();
      }
      
